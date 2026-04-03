@@ -1,13 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   GitBranch, Star, GitFork, Globe, Code2, Filter, ArrowLeft
 } from 'lucide-react';
-import { repoMeta, mockFolders } from '../data/mockData';
 import LoadingScreen from '../components/LoadingScreen';
 import FolderCard from '../components/FolderCard';
 import SearchBar from '../components/SearchBar';
 import EmptyState from '../components/EmptyState';
+
+// Fallback repo meta for decorative purposes if API doesn't provide it
+const DEFAULT_REPO_META = {
+  description: 'No description provided.',
+  stars: 0,
+  forks: 0,
+  language: 'Unknown',
+  topics: [],
+  lastUpdated: 'Recently'
+};
 
 function StatBadge({ icon: Icon, label, value, color = 'text-gray-300' }) {
   return (
@@ -20,24 +29,40 @@ function StatBadge({ icon: Icon, label, value, color = 'text-gray-300' }) {
 }
 
 function formatNum(n) {
+  if (!n) return 0;
   if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
   return n;
 }
 
 export default function Dashboard() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
-  const navigate = useNavigate();
+
+  // Extract analysis results from location state
+  const analysis = location.state?.analysis || { summary: '', folders: [], files: [], repoInfo: {} };
+  const repoMeta = analysis.repoInfo || {};
+  
+  // Use real data from state
+  const folders = analysis.folders || [];
+  const files = analysis.files || [];
+  const summary = analysis.summary || '';
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1600);
-    return () => clearTimeout(timer);
-  }, []);
+    // If no state exists (e.g., direct URL access), redirect home
+    if (!location.state) {
+      navigate('/');
+      return;
+    }
 
-  const filtered = mockFolders.filter((f) =>
+    const timer = setTimeout(() => setLoading(false), 1200);
+    return () => clearTimeout(timer);
+  }, [location.state, navigate]);
+
+  const filtered = folders.filter((f) =>
     f.name.toLowerCase().includes(query.toLowerCase()) ||
-    f.description.toLowerCase().includes(query.toLowerCase()) ||
-    f.techTags.some((t) => t.toLowerCase().includes(query.toLowerCase()))
+    f.explanation.toLowerCase().includes(query.toLowerCase())
   );
 
   if (loading) return <LoadingScreen />;
@@ -68,22 +93,22 @@ export default function Dashboard() {
                   <Code2 className="w-5 h-5 text-brand-400" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-white leading-tight">
+                  <h1 className="text-xl font-bold text-white leading-tight truncate px-1">
                     {repoMeta.owner}/<span className="text-brand-400">{repoMeta.repo}</span>
                   </h1>
                   <a
                     href={repoMeta.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-gray-500 hover:text-brand-400 transition-colors flex items-center gap-1 mt-0.5"
+                    className="text-xs text-gray-500 hover:text-brand-400 transition-colors flex items-center gap-1 mt-0.5 px-1"
                   >
                     <Globe className="w-3 h-3" />
-                    {repoMeta.url.replace('https://', '')}
+                    {repoMeta.url ? repoMeta.url.replace('https://', '') : 'github.com'}
                   </a>
                 </div>
               </div>
-              <p className="text-sm text-gray-400 leading-relaxed max-w-xl">
-                {repoMeta.description}
+              <p className="text-sm text-gray-400 leading-relaxed max-w-xl px-1">
+                {summary}
               </p>
             </div>
 
@@ -91,18 +116,18 @@ export default function Dashboard() {
             <div className="flex flex-wrap gap-4 sm:flex-col">
               <StatBadge icon={Star} value={formatNum(repoMeta.stars)} label="stars" color="text-amber-400" />
               <StatBadge icon={GitFork} value={formatNum(repoMeta.forks)} label="forks" color="text-sky-400" />
-              <StatBadge icon={GitBranch} value={repoMeta.language} label="" color="text-brand-400" />
+              <StatBadge icon={GitBranch} value={repoMeta.language || 'Code'} label="" color="text-brand-400" />
             </div>
           </div>
 
           {/* Topics */}
           <div className="flex flex-wrap gap-2 mt-5 pt-5 border-t border-white/5">
-            {repoMeta.topics.map((t) => (
-              <span key={t} className="text-xs font-mono px-2.5 py-1 rounded-full bg-brand-500/10 text-brand-300 border border-brand-500/20">
+            {repoMeta.topics && repoMeta.topics.map((t) => (
+              <span key={t} className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-300 border border-brand-500/20">
                 #{t}
               </span>
             ))}
-            <span className="ml-auto text-xs text-gray-600 self-center">Updated {repoMeta.lastUpdated}</span>
+            <span className="ml-auto text-xs text-gray-600 self-center">Analysis provided by RepoLens Rule-Engine</span>
           </div>
         </div>
 
@@ -112,7 +137,7 @@ export default function Dashboard() {
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
               <Filter className="w-4 h-4 text-brand-400" />
               Folder Structure
-              <span className="text-sm font-normal text-gray-500 ml-1">({mockFolders.length} directories)</span>
+              <span className="text-sm font-normal text-gray-500 ml-1">({folders.length} directories)</span>
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">Click any card to explore details</p>
           </div>
@@ -124,27 +149,62 @@ export default function Dashboard() {
 
         {/* ── Folder Grid ── */}
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
             {filtered.map((folder, i) => (
-              <FolderCard key={folder.id} folder={folder} index={i} />
+              <FolderCard 
+                key={folder.name} 
+                folder={{ 
+                  ...folder, 
+                  description: folder.explanation,
+                  fileCount: '?', 
+                  size: 'dir', 
+                  techTags: [],
+                  complexity: 'Medium'
+                }} 
+                index={i} 
+              />
             ))}
           </div>
         ) : (
           <EmptyState
             title="No folders match your search"
-            message={`No results for "${query}". Try searching by folder name, description, or technology.`}
+            message={`No results for "${query}". Try searching by folder name.`}
           />
+        )}
+
+        {/* ── Files List Section ── */}
+        {files.length > 0 && (
+          <div className="mt-12 animate-slide-up animation-delay-300">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
+              <Code2 className="w-4 h-4 text-brand-400" />
+              Files at Root
+              <span className="text-sm font-normal text-gray-500 ml-1">({files.length} files)</span>
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {files.map((file, i) => (
+                <div key={i} className="glass p-3 rounded-xl flex items-center justify-between group hover:bg-white/5 transition-colors">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <div className="p-2 rounded-lg bg-white/5 text-gray-400 group-hover:text-brand-400 transition-colors">
+                      <Globe className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-xs font-mono text-gray-300 truncate">{file.name}</span>
+                  </div>
+                  <span className="text-[10px] text-gray-600 font-mono">{file.size}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
         {/* ── Footer Note ── */}
         {filtered.length > 0 && (
           <div className="mt-8 text-center text-xs text-gray-600 animate-fade-in">
-            Showing {filtered.length} of {mockFolders.length} top-level directories ·{' '}
+            Showing {filtered.length} of {folders.length} top-level directories ·{' '}
             <button
               onClick={() => navigate('/chat')}
               className="text-brand-400 hover:text-brand-300 transition-colors underline underline-offset-2"
             >
-              Ask the AI about this repo →
+              Ask about this repo →
             </button>
           </div>
         )}

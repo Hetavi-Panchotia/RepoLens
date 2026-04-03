@@ -1,131 +1,176 @@
 const express = require('express');
 const axios = require('axios');
-const OpenAI = require('openai');
+const supabase = require('../utils/supabase');
 const router = express.Router();
 
-const openai = new OpenAI();
+/**
+ * Helper to extract owner and repo name from a GitHub URL
+ */
+function extractGitHubInfo(url) {
+  try {
+    const trimmed = url.trim().replace(/\/$/, ""); // Remove trailing slash
+    const match = trimmed.match(/^https:\/\/github\.com\/([\w.-]+)\/([\w.-]+)$/);
+    if (!match) return null;
+    return { owner: match[1], repo: match[2] };
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Rule-based folder explanation logic
+ */
+const FOLDER_MAP = {
+  "src": "Main source code of the project",
+  "components": "Reusable UI components",
+  "backend": "Server-side logic and APIs",
+  "utils": "Helper functions and utilities",
+  "public": "Static assets",
+  "services": "Business logic and external API integrations",
+  "hooks": "Custom React hooks",
+  "assets": "Images, fonts, and other static files",
+  "config": "Configuration files and environment setup",
+  "tests": "Unit, integration, and E2E tests",
+  "docs": "Documentation and guides",
+  "styles": "Global styles and CSS modules",
+};
+
+function getFolderExplanation(name) {
+  const lowerName = name.toLowerCase();
+  return FOLDER_MAP[lowerName] || "General project directory";
+}
 
 router.post('/', async (req, res, next) => {
   try {
-    const { repoUrl, owner, repo } = req.body;
+    const { repoUrl } = req.body;
 
-    // Proper error handling for missing inputs
-    if (!repoUrl || !owner || !repo) {
-      return res.status(400).json({ 
-        error: 'Missing required fields: repoUrl, owner, repo' 
-      });
+    if (!repoUrl) {
+      return res.status(400).json({ error: 'Missing required field: repoUrl' });
     }
 
+    const info = extractGitHubInfo(repoUrl);
+    if (!info) {
+      return res.status(400).json({ error: 'Invalid GitHub URL. Format: https://github.com/owner/repo' });
+    }
+
+    const { owner, repo } = info;
+
+    // 1. Check Supabase Cache
+    if (supabase) {
+      console.log(`Checking cache for: ${repoUrl}`);
+      const { data: cachedRepo, error: cacheError } = await supabase
+        .from('repositories')
+        .select('summary, structure, repo_meta')
+        .eq('repo_url', repoUrl)
+        .single();
+
+      if (cachedRepo) {
+        console.log('Cache hit! Returning stored data.');
+        return res.status(200).json({
+          summary: cachedRepo.summary,
+          folders: cachedRepo.structure.folders,
+          files: cachedRepo.structure.files,
+          repoInfo: cachedRepo.repo_meta
+        });
+      }
+
+      if (cacheError && cacheError.code !== 'PGRST116') {
+        console.error('Supabase error checking cache:', cacheError.message);
+      }
+    } else {
+      console.log('Supabase client not initialized. Skipping cache check.');
+    }
+
+    // 2. Fetch from GitHub API
+    console.log(`Fetching from GitHub: ${owner}/${repo}`);
     const headers = {
       'Accept': 'application/vnd.github.v3+json',
-      // We will add User-Agent because GitHub API requires it
       'User-Agent': 'RepoLens-Backend'
     };
     if (process.env.GITHUB_TOKEN) {
       headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
     }
 
+    let contents, repoMeta;
     try {
-      // 1. Fetch overall Repo Info
-      const repoRes = await axios.get(`https://api.github.com/repos/${owner}/${repo}`, { headers });
-      const repoInfo = {
-        name: repoRes.data.name,
-        description: repoRes.data.description,
-        stars: repoRes.data.stargazers_count,
-        language: repoRes.data.language,
+      // 2a. Fetch Repo Metadata (stars, description, etc.)
+      const metaRes = await axios.get(`https://api.github.com/repos/${owner}/${repo}`, { headers });
+      repoMeta = {
+        owner: metaRes.data.owner.login,
+        repo: metaRes.data.name,
+        description: metaRes.data.description,
+        stars: metaRes.data.stargazers_count,
+        forks: metaRes.data.forks_count,
+        language: metaRes.data.language,
+        topics: metaRes.data.topics || [],
+        url: metaRes.data.html_url,
+        lastUpdated: new Date(metaRes.data.updated_at).toLocaleDateString()
       };
 
-      // 2. Fetch Top-Level File List
+      // 2b. Fetch Contents
       const contentsRes = await axios.get(`https://api.github.com/repos/${owner}/${repo}/contents`, { headers });
-      
-      // Ensure we only process if it's an array (sometimes it's a single file if repo is tiny)
-      let fileList = [];
-      if (Array.isArray(contentsRes.data)) {
-        fileList = contentsRes.data.map(item => ({
-          name: item.name,
-          path: item.path,
-          type: item.type, // 'file' or 'dir'
-        }));
-      }
-
-      // 3. Fetch Readme
-      let readmeContent = '';
-      try {
-        const readmeRes = await axios.get(`https://api.github.com/repos/${owner}/${repo}/readme`, {
-          headers: {
-            ...headers,
-            'Accept': 'application/vnd.github.v3.raw'
-          }
-        });
-        readmeContent = readmeRes.data;
-      } catch (readmeErr) {
-        // Readme might not exist, simply leave it empty
-        if (readmeErr.response?.status !== 404) {
-          console.warn('Failed to fetch readme:', readmeErr.message);
-        }
-      }
-
-      const trimmedReadme = typeof readmeContent === 'string' ? readmeContent.slice(0, 8000) : '';
-      
-      // 4. Generate AI Analysis
-      const prompt = `
-Explain this repository like onboarding a developer. Provide a summary and explain each top-level folder.
-
-Repository Name: ${repoInfo.name}
-Description: ${repoInfo.description || 'No description provided'}
-Language: ${repoInfo.language || 'Unknown'}
-
-Top-level files and folders:
-${fileList.map(f => `- ${f.name} (${f.type})`).join('\n')}
-
-README Context:
-${trimmedReadme}
-`;
-
-      const aiResponse = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: `You are an expert senior developer helping a new engineer onboard. Output valid JSON structured exactly like this:
-{
-  "summary": "Plain-English overview of what this project does and how it works.",
-  "folders": [
-    { "name": "folder_or_file_name", "explanation": "Brief explanation of its purpose" }
-  ]
-}`
-          },
-          { role: "user", content: prompt }
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.7,
-      });
-
-      const aiResult = JSON.parse(aiResponse.choices[0].message.content);
-
-      // Return the final data
-      return res.status(200).json({
-        summary: aiResult.summary,
-        folders: aiResult.folders,
-        repoInfo, // Returning raw data too, in case frontend wants it
-      });
-
+      contents = contentsRes.data;
     } catch (githubErr) {
-      // Handle GitHub API errors gracefully
-      if (githubErr.response) {
-        if (githubErr.response.status === 404) {
-          return res.status(404).json({ error: 'Repository not found. Ensure it is public and spelled correctly.' });
-        }
-        if (githubErr.response.status === 403 || githubErr.response.status === 429) {
-          return res.status(429).json({ error: 'GitHub API rate limit exceeded. Please try again later.' });
-        }
+      console.error('GitHub API error:', githubErr.message);
+      if (githubErr.response?.status === 404) {
+        return res.status(404).json({ error: 'Repository not found or is private' });
       }
-      throw githubErr; // Fall down to the outer catch if it's an unknown error
+      return res.status(githubErr.response?.status || 500).json({ error: 'Failed to fetch repository from GitHub' });
     }
 
+    // 3. Process Data (No AI)
+    const folders = contents
+      .filter(item => item.type === 'dir')
+      .map(dir => ({
+        name: dir.name,
+        explanation: getFolderExplanation(dir.name)
+      }));
+
+    const files = contents
+      .filter(item => item.type === 'file')
+      .map(file => ({
+        name: file.name,
+        size: (file.size / 1024).toFixed(1) + ' KB'
+      }));
+
+    const summary = `This repository contains ${folders.length} folders and ${files.length} files at the top level. PRIMARY LANGUAGE: ${repoMeta.language || 'Unknown'}. DESCRIPTION: ${repoMeta.description || 'No description'}.`;
+
+    // 4. Save to Database
+    if (supabase) {
+      console.log('Saving to database...');
+      const { error: insertError } = await supabase
+        .from('repositories')
+        .insert([
+          { 
+            repo_url: repoUrl, 
+            summary: summary, 
+            structure: { folders, files }, 
+            repo_meta: repoMeta 
+          }
+        ]);
+
+      if (insertError) {
+        console.error('Supabase error saving repo:', insertError.message);
+      }
+    } else {
+      console.log('Supabase client not initialized. Skipping database save.');
+    }
+
+    // 5. Return Response
+    return res.status(200).json({
+      summary,
+      folders,
+      files,
+      repoInfo: repoMeta
+    });
+
   } catch (error) {
-    next(error);
+    console.error('Unexpected error:', error.message);
+    res.status(500).json({ error: 'Failed to analyze repository' });
   }
 });
+
+module.exports = router;
+
 
 module.exports = router;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { ArrowRight, Zap, GitBranch, FileSearch, MessageSquare, Star } from 'lucide-react';
 import Button from '../components/Button';
 import RepoInput from '../components/RepoInput';
@@ -46,7 +47,7 @@ export default function Home() {
     setTimeout(() => setIsShaking(false), 500);
   }
 
-  function handleAnalyze() {
+  async function handleAnalyze() {
     const trimmed = repoUrl.trim();
     if (!trimmed) {
       triggerError('Please enter a GitHub repository URL.');
@@ -62,11 +63,26 @@ export default function Home() {
     setError('');
     setLoading(true);
 
-    // Mock analyze: simulate a short delay then navigate to Dashboard
-    setTimeout(() => {
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/analyze`, {
+        repoUrl: trimmed
+      });
+
+      console.log('Result:', response.data);
+      
+      // Navigate and pass real analysis results
+      navigate('/dashboard', { 
+        state: { 
+          analysis: response.data,
+          repoInfo: { url: trimmed, owner: info.owner, repo: info.repo } 
+        } 
+      });
+    } catch (err) {
+      console.error('Analysis failed:', err);
+      triggerError(err.response?.data?.error || 'Failed to analyze repository. Is the backend running?');
+    } finally {
       setLoading(false);
-      navigate('/dashboard');
-    }, 1500);
+    }
   }
 
   function handleKeyDown(e) {
