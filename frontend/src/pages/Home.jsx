@@ -28,28 +28,39 @@ const EXAMPLE_REPOS = [
   'openai/openai-python',
 ];
 
-function isValidGitHubUrl(url) {
-  return /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+(\/)?$/.test(url.trim());
+function extractGitHubInfo(url) {
+  const match = url.trim().match(/^https:\/\/github\.com\/([\w.-]+)\/([\w.-]+)(\/)?$/);
+  return match ? { owner: match[1], repo: match[2] } : null;
 }
 
 export default function Home() {
   const [repoUrl, setRepoUrl] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
   const navigate = useNavigate();
+
+  function triggerError(msg) {
+    setError(msg);
+    setIsShaking(true);
+    setTimeout(() => setIsShaking(false), 500);
+  }
 
   function handleAnalyze() {
     const trimmed = repoUrl.trim();
     if (!trimmed) {
-      setError('Please enter a GitHub repository URL.');
+      triggerError('Please enter a GitHub repository URL.');
       return;
     }
-    if (!isValidGitHubUrl(trimmed)) {
-      setError('Must be a valid GitHub URL — e.g. https://github.com/owner/repo');
+    
+    const info = extractGitHubInfo(trimmed);
+    if (!info) {
+      triggerError('Must be a valid GitHub URL — e.g. https://github.com/owner/repo');
       return;
     }
+
     setError('');
-    console.log('Analyzing repo:', trimmed);
+    console.log('Analyzing repo:', info.owner, '/', info.repo);
 
     // Simulate loading then navigate (no API yet)
     setLoading(true);
@@ -100,7 +111,7 @@ export default function Home() {
         </p>
 
         {/* ── Input Card ── */}
-        <div className="w-full glass rounded-2xl p-5 glow-purple mb-4">
+        <div className={`w-full glass rounded-2xl p-5 glow-purple mb-4 transition-transform ${isShaking ? 'animate-shake' : ''}`}>
           <div className="flex flex-col sm:flex-row items-stretch gap-3">
             <RepoInput
               value={repoUrl}
