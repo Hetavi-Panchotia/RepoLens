@@ -64,7 +64,7 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:3000/api/analyze', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/analyze`, {
         repoUrl: trimmed,
         owner: info.owner,
         repo: info.repo

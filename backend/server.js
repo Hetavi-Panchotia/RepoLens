@@ -20,7 +20,7 @@ app.use('/api/analyze', analyzeRouter);
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error('[Error:', err.message, ']');
-  res.status(500).json({ error: 'Internal Server Error' });
+  res.status(500).json({ error: err.message, stack: err.stack });
 });
 
 // Start Server
