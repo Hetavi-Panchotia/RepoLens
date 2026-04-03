@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { ArrowRight, Zap, GitBranch, FileSearch, MessageSquare, Star } from 'lucide-react';
 import Button from '../components/Button';
 import RepoInput from '../components/RepoInput';
@@ -46,7 +47,7 @@ export default function Home() {
     setTimeout(() => setIsShaking(false), 500);
   }
 
-  function handleAnalyze() {
+  async function handleAnalyze() {
     const trimmed = repoUrl.trim();
     if (!trimmed) {
       triggerError('Please enter a GitHub repository URL.');
@@ -60,15 +61,25 @@ export default function Home() {
     }
 
     setError('');
-    console.log('Analyzing repo:', info.owner, '/', info.repo);
-
-    // Simulate loading then navigate (no API yet)
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      // Will navigate to dashboard when backend is ready
+
+    try {
+      const response = await axios.post('http://localhost:3000/api/analyze', {
+        repoUrl: trimmed,
+        owner: info.owner,
+        repo: info.repo
+      });
+
+      console.log('API Response:', response.data);
+
+      // Will navigate to dashboard when backend is fully ready
       // navigate(`/dashboard?url=${encodeURIComponent(trimmed)}`);
-    }, 1500);
+    } catch (err) {
+      console.error('API Error:', err);
+      triggerError(err.response?.data?.error || 'Failed to analyze repository. Is the backend running?');
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleKeyDown(e) {
