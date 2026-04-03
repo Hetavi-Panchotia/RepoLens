@@ -17,13 +17,31 @@
     @apply bg-surface-900 text-gray-100 font-sans antialiased;
     background-color: #0a0a0f;
   }
+
+  /* ── Custom Scrollbar ── */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.3);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.55);
+  }
 }
 
 @layer components {
+  /* ── Glassmorphism ── */
   .glass {
     @apply bg-surface-700/60 backdrop-blur-xl border border-white/5;
   }
 
+  /* ── Glow Effects ── */
   .glow-purple {
     box-shadow: 0 0 30px rgba(139, 92, 246, 0.25), 0 0 60px rgba(139, 92, 246, 0.1);
   }
@@ -32,14 +50,80 @@
     box-shadow: 0 0 40px rgba(139, 92, 246, 0.5), 0 0 80px rgba(139, 92, 246, 0.2);
   }
 
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 8px 40px rgba(139, 92, 246, 0.2), 0 0 0 1px rgba(139, 92, 246, 0.15);
+  }
+
+  /* ── Input Glow ── */
   .input-glow:focus {
     box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5), 0 0 30px rgba(139, 92, 246, 0.15);
   }
 
+  /* ── Text Gradient ── */
   .text-gradient {
     background: linear-gradient(135deg, #e2d9f3 0%, #a78bfa 50%, #7c3aed 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  /* ── Skeleton Shimmer ── */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.04) 25%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0.04) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton 1.8s ease-in-out infinite;
+  }
+
+  /* ── Folder Expand/Collapse ── */
+  .folder-details {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s ease-out, opacity 0.3s ease-out;
+    opacity: 0;
+  }
+  .folder-details.open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+  .folder-details-inner {
+    overflow: hidden;
+  }
+
+  /* ── Page Fade-In ── */
+  .page-enter {
+    animation: fadeIn 0.45s ease-out both;
+  }
+
+  /* ── Navbar active link ── */
+  .nav-link {
+    @apply relative text-sm font-medium text-gray-400 transition-colors duration-200 hover:text-white px-1 py-1;
+  }
+  .nav-link::after {
+    content: '';
+    @apply absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-brand-400 to-brand-600 rounded-full transition-all duration-300;
+  }
+  .nav-link.active {
+    @apply text-white;
+  }
+  .nav-link.active::after {
+    @apply w-full;
+  }
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+}
+
+@layer utilities {
+  .animation-delay-150 { animation-delay: 0.15s; }
+  .animation-delay-300 { animation-delay: 0.3s; }
+  .animation-delay-100 { animation-delay: 0.1s; }
 }

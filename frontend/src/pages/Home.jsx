@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { ArrowRight, Zap, GitBranch, FileSearch, MessageSquare, Star } from 'lucide-react';
 import Button from '../components/Button';
 import RepoInput from '../components/RepoInput';
@@ -47,13 +46,13 @@ export default function Home() {
     setTimeout(() => setIsShaking(false), 500);
   }
 
-  async function handleAnalyze() {
+  function handleAnalyze() {
     const trimmed = repoUrl.trim();
     if (!trimmed) {
       triggerError('Please enter a GitHub repository URL.');
       return;
     }
-    
+
     const info = extractGitHubInfo(trimmed);
     if (!info) {
       triggerError('Must be a valid GitHub URL — e.g. https://github.com/owner/repo');
@@ -63,23 +62,11 @@ export default function Home() {
     setError('');
     setLoading(true);
 
-    try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/analyze`, {
-        repoUrl: trimmed,
-        owner: info.owner,
-        repo: info.repo
-      });
-
-      console.log('API Response:', response.data);
-
-      // Will navigate to dashboard when backend is fully ready
-      // navigate(`/dashboard?url=${encodeURIComponent(trimmed)}`);
-    } catch (err) {
-      console.error('API Error:', err);
-      triggerError(err.response?.data?.error || 'Failed to analyze repository. Is the backend running?');
-    } finally {
+    // Mock analyze: simulate a short delay then navigate to Dashboard
+    setTimeout(() => {
       setLoading(false);
-    }
+      navigate('/dashboard');
+    }, 1500);
   }
 
   function handleKeyDown(e) {
