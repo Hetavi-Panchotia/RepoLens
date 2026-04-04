@@ -12,7 +12,7 @@ export default function RepoInput({ value, onChange, onKeyDown, error, loading, 
       <form onSubmit={handleSubmit} className="relative group animate-slide-up">
         <div className="absolute -inset-1 bg-gradient-to-r from-brand-600 via-brand-400 to-brand-600 rounded-2xl blur-lg opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
         <div className="relative flex items-center bg-slate-900 border border-white/10 rounded-2xl p-2 shadow-sm backdrop-blur-xl transition-all group-hover:border-white/20">
-          
+
           <div className="pl-4 pr-2 text-gray-500">
             <GitBranch className="w-5 h-5 group-hover:text-brand-400 transition-colors" />
           </div>

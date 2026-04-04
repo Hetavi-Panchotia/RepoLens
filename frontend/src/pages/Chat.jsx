@@ -30,7 +30,12 @@ export default function Chat() {
   const [errorStatus, setErrorStatus] = useState(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Small delay ensures the scroll happens after the new message animation starts,
+    // creating a more fluid tracking experience.
+    const timer = setTimeout(() => {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+    return () => clearTimeout(timer);
   }, [messages, isTyping]);
 
   useEffect(() => {
@@ -42,15 +47,15 @@ export default function Chat() {
   const getMockResponse = (text) => {
     const q = text.toLowerCase();
     const summary = analysis?.summary || "This is a complex codebase.";
-    
+
     if (q.includes('logic') || q.includes('entry')) {
       return `Based on my analysis, the main logic starts in the root entries mentioned in the summary: ${summary?.slice(0, 100) || 'Main entry points'}... You should check the principal components first.`;
     }
     if (q.includes('folder') || q.includes('structure')) {
-       return `The folder structure follows a standard pattern. I've summarized the key directories in your dashboard. Most of the business logic resides in the primary source folders.`;
+      return `The folder structure follows a standard pattern. I've summarized the key directories in your dashboard. Most of the business logic resides in the primary source folders.`;
     }
     if (q.includes('start') || q.includes('new developer')) {
-       return `A new developer should start by reading the README and then looking into the main entry points. Basically: ${summary?.slice(0, 150) || 'Read the structure summary'}.`;
+      return `A new developer should start by reading the README and then looking into the main entry points. Basically: ${summary?.slice(0, 150) || 'Read the structure summary'}.`;
     }
     return `I'm currently having trouble connecting to my brain, but based on the initial scan: ${summary || 'This repository has a complex structure.'}`;
   };
@@ -82,15 +87,15 @@ export default function Chat() {
         text: response.data.answer,
         timestamp: new Date(),
       };
-      
+
       // Ensure at least 1s delay for "thinking" feel
       const elapsed = Date.now() - start;
       if (elapsed < 1000) await new Promise(r => setTimeout(r, 1000 - elapsed));
-      
+
       setMessages((prev) => [...prev, aiMsg]);
     } catch (err) {
       console.error('Chat Error:', err);
-      
+
       // FALLBACK LOGIC
       const mockText = getMockResponse(text);
       const aiMsg = {
@@ -99,10 +104,10 @@ export default function Chat() {
         text: `[Fallback Mode] ${mockText}`,
         timestamp: new Date(),
       };
-      
+
       await new Promise(r => setTimeout(r, 1500)); // Artificial thinking delay for fallback
       setMessages((prev) => [...prev, aiMsg]);
-      
+
       if (err.response?.status === 429) {
         setErrorStatus("API Rate Limit reached. Using smart fallback.");
       }
@@ -129,7 +134,7 @@ export default function Chat() {
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-pink-600/5 blur-[120px] pointer-events-none" />
 
       {/* ── Header ── */}
-      <motion.div 
+      <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         className="relative z-20 glass border-b border-white/5 px-6 py-4 flex items-center justify-between shadow-xl"
@@ -142,18 +147,18 @@ export default function Chat() {
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
           </button>
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
-                <Bot className="w-6 h-6 text-white" />
-             </div>
-             <div>
-                <h2 className="text-sm font-bold text-white tracking-tight">RepoLens Assistant</h2>
-                <div className="flex items-center gap-1.5">
-                  <span className={`w-1.5 h-1.5 rounded-full ${isTyping ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
-                  <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-                    {isTyping ? 'Thinking...' : 'Online & Ready'}
-                  </span>
-                </div>
-             </div>
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+              <Bot className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-white tracking-tight">RepoLens Assistant</h2>
+              <div className="flex items-center gap-1.5">
+                <span className={`w-1.5 h-1.5 rounded-full ${isTyping ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
+                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                  {isTyping ? 'Thinking...' : 'Online & Ready'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -181,15 +186,15 @@ export default function Chat() {
               </motion.div>
             ))}
           </AnimatePresence>
-          
+
           {isTyping && (
-             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <TypingIndicator />
-             </motion.div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <TypingIndicator />
+            </motion.div>
           )}
 
           {errorStatus && (
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               className="flex items-center gap-2 text-amber-400 bg-amber-500/10 border border-amber-500/20 p-3 rounded-2xl text-xs font-bold w-max mx-auto"
@@ -198,7 +203,7 @@ export default function Chat() {
               {errorStatus}
             </motion.div>
           )}
-          
+
           <div ref={bottomRef} className="h-10" />
         </div>
       </div>
@@ -231,10 +236,10 @@ export default function Chat() {
               </button>
             </div>
           </div>
-          
+
           <div className="flex justify-between items-center mt-3 px-2">
             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-brand-400" /> GEMINI 2.0 Contextual 
+              <Sparkles className="w-3 h-3 text-brand-400" /> GEMINI 2.0 Contextual
             </p>
             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
               ⏎ Enter to send

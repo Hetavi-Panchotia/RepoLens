@@ -54,7 +54,7 @@ export default function FolderCard({ folder, index = 0 }) {
           <div className="flex flex-col ml-auto text-right">
             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Size</span>
             <div className="text-gray-200 font-semibold text-sm font-mono">
-              {folder.sizeKB >= 1000 ? (folder.sizeKB/1000).toFixed(1) + ' MB' : folder.sizeKB + ' KB'}
+              {folder.sizeKB >= 1000 ? (folder.sizeKB / 1000).toFixed(1) + ' MB' : folder.sizeKB + ' KB'}
             </div>
           </div>
         )}

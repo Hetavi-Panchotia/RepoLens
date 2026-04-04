@@ -19,15 +19,15 @@ export default function Home() {
     if (!targetUrl) return;
     setLoading(true);
     setError(null);
-    
+
     try {
       const trimmed = targetUrl.trim().replace(/\/$/, "");
       const match = trimmed.match(/github\.com\/([^/]+)\/([^/]+)/);
       if (!match) throw new Error("Invalid GitHub URL. Please use https://github.com/owner/repo");
-      
+
       const info = { owner: match[1], repo: match[2] };
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      
+
       const response = await axios.post(`${API_BASE_URL}/api/analyze`, { repoUrl: trimmed });
 
       setRepoData(response.data, { url: trimmed, owner: info.owner, repo: info.repo });
@@ -46,7 +46,7 @@ export default function Home() {
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
       transition: { staggerChildren: 0.15 }
     }
@@ -58,20 +58,22 @@ export default function Home() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen overflow-x-hidden pt-24 pb-20 px-4 sm:px-6 lg:px-8 selection:bg-brand-500/30">
       {/* ── Background Aesthetics ── */}
-      <div className="absolute inset-0 bg-grid-pattern bg-grid opacity-100 pointer-events-none" />
-      <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full bg-brand-600/10 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-100px] right-0 w-[400px] h-[400px] rounded-full bg-pink-600/5 blur-[120px] pointer-events-none" />
+      <div className="fixed inset-0 bg-slate-950 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-grid opacity-10" />
+        <div className="absolute top-[-5%] left-[-5%] w-[40%] h-[40%] rounded-full bg-brand-600/5 blur-[80px] animate-pulse-slow" />
+        <div className="absolute bottom-[-5%] right-[-5%] w-[40%] h-[40%] rounded-full bg-pink-600/5 blur-[80px] animate-pulse-slow animation-delay-300" />
+      </div>
 
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="relative z-10 max-w-5xl mx-auto flex flex-col items-center text-center"
       >
         {/* ── Badge ── */}
-        <motion.div 
+        <motion.div
           variants={itemVariants}
           className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-bold mb-8 glow-box"
         >
@@ -85,7 +87,7 @@ export default function Home() {
         </motion.div>
 
         {/* ── Hero Title ── */}
-        <motion.h1 
+        <motion.h1
           variants={itemVariants}
           className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1]"
         >
@@ -93,35 +95,35 @@ export default function Home() {
           <span className="text-brand-400 drop-shadow-2xl">in milliseconds.</span>
         </motion.h1>
 
-        <motion.p 
+        <motion.p
           variants={itemVariants}
           className="max-w-2xl text-lg text-gray-400 mb-10 leading-relaxed font-medium"
         >
-          Paste a GitHub link and let RepoLens analyze the architecture, logic, 
+          Paste a GitHub link and let RepoLens analyze the architecture, logic,
           and documentation for you. The future of codebase analysis is here.
         </motion.p>
 
         {/* ── Main Action ── */}
-        <motion.div 
+        <motion.div
           variants={itemVariants}
           className="w-full max-w-2xl mb-12"
         >
           <div className="relative group p-[2px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-300">
-             {/* Dynamic Border Gradient */}
+            {/* Dynamic Border Gradient */}
             <div className="absolute inset-0 bg-gradient-to-r from-brand-600 via-pink-400 to-sky-500 animate-pulse-slow opacity-60 group-focus-within:opacity-100" />
-            
+
             <div className="relative bg-slate-950 rounded-2xl p-6">
-              <RepoInput 
+              <RepoInput
                 value={url}
                 onChange={(e) => { setUrl(e.target.value); setError(null); }}
                 onKeyDown={handleKeyDown}
-                onSubmit={handleAnalyze} 
-                loading={loading} 
+                onSubmit={handleAnalyze}
+                loading={loading}
                 error={error}
               />
             </div>
           </div>
-          
+
           <div className="mt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-gray-500 font-medium">
             <div className="flex items-center gap-1.5 hover:text-brand-400 transition-colors cursor-default">
               <Zap className="w-4 h-4 text-brand-500" /> Fast AI Processing
@@ -135,7 +137,7 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* ── Social / Stats ── */}
+        {/* ── Social / Stats ──
         <motion.div 
           variants={itemVariants}
           className="flex flex-wrap justify-center items-center gap-10 md:gap-20 py-8 border-y border-white/5 w-full mb-20"
@@ -155,14 +157,14 @@ export default function Home() {
             <span className="text-2xl font-bold text-white mb-1">3.0s</span>
             <span className="text-[10px] uppercase tracking-widest text-gray-600 font-bold">Latency average</span>
           </div>
-        </motion.div>
+        </motion.div> */}
 
         {/* ── Recent ── */}
         <motion.div variants={itemVariants} className="w-full">
           <RecentRepos onSelect={handleAnalyze} />
         </motion.div>
       </motion.div>
-      
+
       {/* ── Decorations ── */}
       <div className="absolute top-1/2 left-0 -translate-y-1/2 w-64 h-64 bg-brand-500/5 blur-[100px] pointer-events-none" />
       <div className="absolute top-1/4 right-0 w-96 h-96 bg-purple-500/3 blur-[120px] pointer-events-none" />

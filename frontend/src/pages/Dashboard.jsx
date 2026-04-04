@@ -42,7 +42,7 @@ export default function Dashboard() {
       let fileCount = undefined;
       let dirCount = undefined;
       let size = 0;
-      
+
       if (rawStructure.tree && rawStructure.tree.length > 0) {
         fileCount = 0;
         dirCount = 0;
@@ -67,13 +67,13 @@ export default function Dashboard() {
     });
   }, [rawStructure, rootFolders]);
 
-  const filteredFolders = enhancedFolders.filter(f => 
-    f.name.toLowerCase().includes(query.toLowerCase()) || 
+  const filteredFolders = enhancedFolders.filter(f =>
+    f.name.toLowerCase().includes(query.toLowerCase()) ||
     (f.explanation || '').toLowerCase().includes(query.toLowerCase())
   );
 
   const rootFiles = rawStructure.root?.files || rawStructure.files || [];
-  const filteredFiles = rootFiles.filter(f => 
+  const filteredFiles = rootFiles.filter(f =>
     f.name.toLowerCase().includes(query.toLowerCase())
   );
 
@@ -106,11 +106,13 @@ export default function Dashboard() {
   return (
     <div className="relative min-h-screen pt-20 sm:pt-24 pb-16 px-4">
       {/* Background Aesthetics */}
-      <div className="absolute inset-0 bg-grid-pattern bg-grid opacity-100 pointer-events-none" />
-      <div className="absolute top-[-150px] right-[-100px] w-[500px] h-[500px] rounded-full bg-brand-600/8 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 left-[-100px] w-[300px] h-[300px] rounded-full bg-sky-600/5 blur-[100px] pointer-events-none" />
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-grid opacity-10" />
+        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-brand-600/5 blur-[80px] animate-pulse-slow" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-sky-600/5 blur-[60px] animate-pulse-slow animation-delay-300" />
+      </div>
 
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -135,12 +137,12 @@ export default function Dashboard() {
               New Analysis
             </button>
           </div>
-          
+
           <div className="flex items-center gap-3">
-             <div className="flex -space-x-1 overflow-hidden">
-                {[1,2,3].map(i => <div key={i} className="inline-block h-6 w-6 rounded-full ring-2 ring-slate-950 bg-slate-800" />)}
-             </div>
-             <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">12 Developers Tracking</span>
+            <div className="flex -space-x-1 overflow-hidden">
+              {[1, 2, 3].map(i => <div key={i} className="inline-block h-6 w-6 rounded-full ring-2 ring-slate-950 bg-slate-800" />)}
+            </div>
+            <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">12 Developers Tracking</span>
           </div>
         </motion.div>
 
@@ -177,16 +179,16 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-wrap gap-3 md:flex-col justify-start">
-               {[
-                 { icon: Star, value: formatNum(repoMeta.stars), color: 'text-amber-400' },
-                 { icon: GitFork, value: formatNum(repoMeta.forks), color: 'text-sky-400' },
-                 { icon: Code2, value: repoMeta.language || 'Code', color: 'text-brand-400' }
-               ].map((stat, i) => (
-                 <div key={i} className="flex items-center gap-2 px-3 py-1.5 glass-premium rounded-xl border border-white/5 min-w-[90px]">
-                   <stat.icon className={`w-3.5 h-3.5 ${stat.color}`} />
-                   <span className="font-bold text-gray-200 text-xs">{stat.value}</span>
-                 </div>
-               ))}
+              {[
+                { icon: Star, value: formatNum(repoMeta.stars), color: 'text-amber-400' },
+                { icon: GitFork, value: formatNum(repoMeta.forks), color: 'text-sky-400' },
+                { icon: Code2, value: repoMeta.language || 'Code', color: 'text-brand-400' }
+              ].map((stat, i) => (
+                <div key={i} className="flex items-center gap-2 px-3 py-1.5 glass-premium rounded-xl border border-white/5 min-w-[90px]">
+                  <stat.icon className={`w-3.5 h-3.5 ${stat.color}`} />
+                  <span className="font-bold text-gray-200 text-xs">{stat.value}</span>
+                </div>
+              ))}
             </div>
           </div>
         </motion.div>
@@ -199,7 +201,7 @@ export default function Dashboard() {
               Repository Visual Architecture
             </h2>
             <div className="flex items-center gap-1 text-[10px] text-gray-500 uppercase tracking-widest font-bold">
-               <Info className="w-3 h-3" /> Interactive Flow
+              <Info className="w-3 h-3" /> Interactive Flow
             </div>
           </div>
           <RepoFlowchart analysis={analysis} />
@@ -207,22 +209,22 @@ export default function Dashboard() {
 
         {/* ── Key Metrics ── */}
         <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-            <ArchitectureCard label="Total Folders" value={totalFoldersCount} icon={Folder} colorClass="text-brand-400" />
-            <ArchitectureCard label="Total Files" value={totalFilesCount} icon={File} colorClass="text-emerald-400" />
-            <ArchitectureCard label="Entry Points" value={enhancedFolders.length} icon={Zap} colorClass="text-amber-400" />
-            <ArchitectureCard label="Tech Stack" value={repoMeta.language || 'Main'} icon={Globe} colorClass="text-sky-400" />
+          <ArchitectureCard label="Total Folders" value={totalFoldersCount} icon={Folder} colorClass="text-brand-400" />
+          <ArchitectureCard label="Total Files" value={totalFilesCount} icon={File} colorClass="text-emerald-400" />
+          <ArchitectureCard label="Entry Points" value={enhancedFolders.length} icon={Zap} colorClass="text-amber-400" />
+          <ArchitectureCard label="Tech Stack" value={repoMeta.language || 'Main'} icon={Globe} colorClass="text-sky-400" />
         </motion.div>
 
         {/* ── Grid Folder Explorer ── */}
         <motion.div variants={itemVariants} className="mb-16">
-           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <Filter className="w-5 h-5 text-brand-400" />
               Root Explorer
             </h2>
             <SearchBar value={query} onChange={setQuery} count={filteredFolders.length + filteredFiles.length} />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {filteredFolders.map((folder, i) => (
               <FolderCard key={folder.name} folder={folder} index={i} />
@@ -231,8 +233,8 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredFiles.map((file, i) => (
-              <div 
-                key={file.name} 
+              <div
+                key={file.name}
                 onClick={() => handlePreview(file.name)}
                 className="cursor-pointer"
               >
@@ -245,11 +247,11 @@ export default function Dashboard() {
         {/* ── AI Chat CTA ── */}
         <motion.div variants={itemVariants} className="relative group overflow-hidden rounded-[2rem] p-[1px] mb-10">
           <div className="absolute inset-0 bg-gradient-to-r from-brand-500 via-pink-400 to-sky-400 opacity-60 group-hover:opacity-100 transition-opacity animate-pulse-slow" />
-          <div className="relative bg-slate-950/90 backdrop-blur-2xl rounded-[2rem] p-10 flex flex-col md:flex-row items-center justify-between gap-8 border border-white/10">
+          <div className="relative bg-slate-950/80 backdrop-blur-xl rounded-[2rem] p-10 flex flex-col md:flex-row items-center justify-between gap-8 border border-white/10">
             <div className="flex-1 text-center md:text-left">
               <h2 className="text-3xl font-extrabold text-white mb-3">Ask RepoLens anything.</h2>
               <p className="text-gray-400 max-w-xl">
-                Get context-aware answers about architecture, logic, or specific functions. 
+                Get context-aware answers about architecture, logic, or specific functions.
                 Trained on this repository's unique structure.
               </p>
             </div>
@@ -264,9 +266,9 @@ export default function Dashboard() {
       </motion.div>
 
       {/* File Preview Panel Overlay */}
-      <FilePreviewPanel 
-        isOpen={isPreviewOpen} 
-        onClose={() => setIsPreviewOpen(false)} 
+      <FilePreviewPanel
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
         filePath={selectedFile}
         repoInfo={repoMeta}
       />

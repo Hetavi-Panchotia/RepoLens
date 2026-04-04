@@ -51,21 +51,21 @@ export default function FileCard({ file, index = 0 }) {
             <h3 className="font-mono text-sm font-semibold text-white group-hover:text-brand-300 transition-colors truncate">
               {file.name}
             </h3>
-             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">FILE</p>
+            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">FILE</p>
           </div>
         </div>
 
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
-           {badge && (
-             <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-gray-400 border border-white/5 font-mono">
-               {badge}
-             </span>
-           )}
-           {sizeKB > 0 && (
-            <span className="text-[10px] text-gray-500 font-mono">
-              {sizeKB >= 1000 ? (sizeKB/1000).toFixed(1) + ' MB' : sizeKB.toFixed(1) + ' KB'}
+          {badge && (
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-gray-400 border border-white/5 font-mono">
+              {badge}
             </span>
-           )}
+          )}
+          {sizeKB > 0 && (
+            <span className="text-[10px] text-gray-500 font-mono">
+              {sizeKB >= 1000 ? (sizeKB / 1000).toFixed(1) + ' MB' : sizeKB.toFixed(1) + ' KB'}
+            </span>
+          )}
         </div>
       </div>
     </SpotlightCard>
