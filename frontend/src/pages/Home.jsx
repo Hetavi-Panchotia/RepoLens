@@ -59,7 +59,7 @@ export default function Home() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden pt-32 pb-32 px-6 selection:bg-brand-500/30">
+    <div className="relative min-h-screen overflow-x-hidden pt-8 pb-32 px-6 selection:bg-brand-500/30">
       {/* ── Background Aesthetics ── */}
       <div className="fixed inset-0 bg-slate-950 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-grid opacity-10" />
@@ -76,14 +76,14 @@ export default function Home() {
         {/* ── Badge ── */}
         <motion.div
           variants={itemVariants}
-          className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-[10px] font-black uppercase tracking-[0.2em] mb-12 shadow-inner"
+          className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-[10px] font-black uppercase tracking-[0.2em] mb-8 shadow-inner"
         >
           <Sparkles className="w-3.5 h-3.5" />
           <span>BETA v1.1 • POWERED BY GEMINI 2.0</span>
         </motion.div>
 
         {/* ── Hero Title ── */}
-        <div className="text-center mb-16 px-4">
+        <div className="text-center mb-10 px-4">
           <motion.h1
             variants={itemVariants}
             className="text-6xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.95] text-white"
@@ -120,7 +120,7 @@ export default function Home() {
               />
               
               <div className="mt-8">
-                <SuggestionChips onSelect={setUrl} disabled={loading} />
+                <SuggestionChips onSelect={handleAnalyze} disabled={loading} />
               </div>
             </div>
           </div>

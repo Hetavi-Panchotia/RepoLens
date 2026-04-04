@@ -13,9 +13,9 @@ export default function RepoInput({ value, onChange, onKeyDown, error, loading, 
     <div className={`w-full transition-all duration-300 ${className}`}>
       <form onSubmit={handleSubmit} className="relative group animate-slide-up">
         {/* Border Glow Gradient */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-brand-600 via-pink-400 to-sky-500 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 group-focus-within:opacity-50 transition duration-1000 group-hover:duration-300" />
+        <div className="absolute -inset-1 bg-gradient-to-r from-brand-600 via-pink-400 to-sky-500 rounded-full blur-xl opacity-20 group-hover:opacity-40 group-focus-within:opacity-50 transition duration-1000 group-hover:duration-300" />
         
-        <div className="relative flex items-center bg-slate-900/60 border border-white/10 rounded-2xl p-2.5 shadow-2xl backdrop-blur-2xl transition-all duration-500 group-hover:border-brand-500/30">
+        <div className="relative flex items-center bg-slate-900/60 border border-white/10 rounded-full p-2.5 shadow-2xl backdrop-blur-2xl transition-all duration-500 group-hover:border-brand-500/30">
           
           {/* GitHub Icon Indicator */}
           <div className="pl-5 pr-3 text-gray-500 border-r border-white/5 mr-2">
@@ -37,10 +37,10 @@ export default function RepoInput({ value, onChange, onKeyDown, error, loading, 
           <button
             type="submit"
             disabled={loading || !value.trim() || !value.includes('github.com/')}
-            className="relative inline-flex h-12 overflow-hidden rounded-xl p-[1px] focus:outline-none hover:scale-[1.05] active:scale-[0.95] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed group/btn ml-2"
+            className="relative inline-flex h-12 overflow-hidden rounded-full p-[1px] focus:outline-none hover:scale-[1.05] active:scale-[0.95] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed group/btn ml-2"
           >
             <span className="absolute inset-[-1000%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#8b5cf6_0%,#ec4899_50%,#8b5cf6_100%)] opacity-80 group-hover/btn:opacity-100 transition-opacity" />
-            <span className="inline-flex h-full w-full items-center justify-center rounded-xl bg-slate-950 px-8 py-2 text-sm font-black text-white uppercase tracking-widest backdrop-blur-3xl gap-2 transition-all hover:bg-slate-900 group-hover/btn:shadow-[0_0_25px_rgba(139,92,246,0.4)]">
+            <span className="inline-flex h-full w-full items-center justify-center rounded-full bg-slate-950 px-8 py-2 text-sm font-black text-white uppercase tracking-widest backdrop-blur-3xl gap-2 transition-all hover:bg-slate-900 group-hover/btn:shadow-[0_0_25px_rgba(139,92,246,0.4)]">
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin text-brand-400" />

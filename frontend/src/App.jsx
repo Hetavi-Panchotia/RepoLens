@@ -20,27 +20,33 @@ export default function App() {
       <BrowserRouter>
         <ScrollToTop />
         <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/chat" 
-            element={
-              <ProtectedRoute>
-                <Chat />
-              </ProtectedRoute>
-            } 
-          />
-          {/* Fallback for any unknown routes */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <div className="flex flex-col h-screen w-full relative">
+          <div className="flex-1 overflow-y-auto w-full scroll-smooth">
+            <div className="pt-14 h-full flex flex-col">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/chat" 
+                  element={
+                    <ProtectedRoute>
+                      <Chat />
+                    </ProtectedRoute>
+                  } 
+                />
+                {/* Fallback for any unknown routes */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </div>
+          </div>
+        </div>
       </BrowserRouter>
     </RepoProvider>
   );
