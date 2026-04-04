@@ -60,8 +60,7 @@ export default function Navbar() {
             to={to}
             end={to === '/'}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-xs transition-colors duration-200 ${
-                isActive ? 'text-brand-400 bg-brand-500/10' : 'text-gray-500 hover:text-gray-300'
+              `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-xs transition-colors duration-200 ${isActive ? 'text-brand-400 bg-brand-500/10' : 'text-gray-500 hover:text-gray-300'
               }`
             }
           >

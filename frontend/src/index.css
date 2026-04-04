@@ -103,6 +103,31 @@
     animation: fadeIn 0.45s ease-out both;
   }
 
+  /* ── Animations ── */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out both;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out both;
+  }
+
+  /* ── Background Grid ── */
+  .bg-grid {
+    background-size: 40px 40px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  }
+
   /* ── Navbar active link ── */
   .nav-link {
     @apply relative text-sm font-medium text-gray-400 transition-colors duration-200 hover:text-white px-1 py-1;

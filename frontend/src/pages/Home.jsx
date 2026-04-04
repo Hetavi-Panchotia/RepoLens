@@ -69,13 +69,13 @@ export default function Home() {
       });
 
       console.log('Result:', response.data);
-      
+
       // Navigate and pass real analysis results
-      navigate('/dashboard', { 
-        state: { 
+      navigate('/dashboard', {
+        state: {
           analysis: response.data,
-          repoInfo: { url: trimmed, owner: info.owner, repo: info.repo } 
-        } 
+          repoInfo: { url: trimmed, owner: info.owner, repo: info.repo }
+        }
       });
     } catch (err) {
       console.error('Analysis failed:', err);

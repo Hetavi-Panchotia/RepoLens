@@ -141,11 +141,11 @@ router.post('/', async (req, res, next) => {
       const { error: insertError } = await supabase
         .from('repositories')
         .insert([
-          { 
-            repo_url: repoUrl, 
-            summary: summary, 
-            structure: { folders, files }, 
-            repo_meta: repoMeta 
+          {
+            repo_url: repoUrl,
+            summary: summary,
+            structure: { folders, files },
+            repo_meta: repoMeta
           }
         ]);
 

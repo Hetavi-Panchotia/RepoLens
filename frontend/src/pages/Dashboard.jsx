@@ -43,7 +43,7 @@ export default function Dashboard() {
   // Extract analysis results from location state
   const analysis = location.state?.analysis || { summary: '', folders: [], files: [], repoInfo: {} };
   const repoMeta = analysis.repoInfo || {};
-  
+
   // Use real data from state
   const folders = analysis.folders || [];
   const files = analysis.files || [];
@@ -151,17 +151,17 @@ export default function Dashboard() {
         {filtered.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
             {filtered.map((folder, i) => (
-              <FolderCard 
-                key={folder.name} 
-                folder={{ 
-                  ...folder, 
+              <FolderCard
+                key={folder.name}
+                folder={{
+                  ...folder,
                   description: folder.explanation,
-                  fileCount: '?', 
-                  size: 'dir', 
+                  fileCount: '?',
+                  size: 'dir',
                   techTags: [],
                   complexity: 'Medium'
-                }} 
-                index={i} 
+                }}
+                index={i}
               />
             ))}
           </div>
