@@ -36,7 +36,7 @@ export default function RepoInput({ value, onChange, onKeyDown, error, loading, 
 
           <button
             type="submit"
-            disabled={loading || !value.trim()}
+            disabled={loading || !value.trim() || !value.includes('github.com/')}
             className="relative inline-flex h-12 overflow-hidden rounded-xl p-[1px] focus:outline-none hover:scale-[1.05] active:scale-[0.95] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed group/btn ml-2"
           >
             <span className="absolute inset-[-1000%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#8b5cf6_0%,#ec4899_50%,#8b5cf6_100%)] opacity-80 group-hover/btn:opacity-100 transition-opacity" />

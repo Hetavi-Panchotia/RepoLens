@@ -39,18 +39,19 @@ export default function Dashboard() {
   const enhancedFolders = useMemo(() => {
     return rootFolders.map(folder => {
       const prefix = folder.name + '/';
-      let fileCount = undefined;
-      let dirCount = undefined;
+      let fileCount = 0;
+      let dirCount = 0;
       let size = 0;
+      const extensions = new Set();
 
       if (rawStructure.tree && rawStructure.tree.length > 0) {
-        fileCount = 0;
-        dirCount = 0;
         rawStructure.tree.forEach(item => {
           if (item.path.startsWith(prefix)) {
             if (item.type === 'blob') {
               fileCount++;
               size += item.size || 0;
+              const ext = item.path.split('.').pop()?.toLowerCase();
+              if (ext) extensions.add(ext);
             } else if (item.type === 'tree') {
               dirCount++;
             }
@@ -58,11 +59,26 @@ export default function Dashboard() {
         });
       }
 
+      // Infer Folder Purpose
+      let inferredDesc = null;
+      if (extensions.has('js') || extensions.has('jsx') || extensions.has('ts') || extensions.has('tsx')) {
+        inferredDesc = 'Core Application Source Logic';
+      } else if (extensions.has('css') || extensions.has('scss') || extensions.has('less')) {
+        inferredDesc = 'Styling & Visual Design Components';
+      } else if (extensions.has('test.js') || extensions.has('spec.ts') || extensions.has('test.ts')) {
+        inferredDesc = 'Testing & Quality Assurance Suite';
+      } else if (extensions.has('png') || extensions.has('svg') || extensions.has('jpg')) {
+        inferredDesc = 'Media, Images & Static Assets';
+      } else if (extensions.has('json') || extensions.has('yaml') || extensions.has('yml')) {
+        inferredDesc = 'Project Configuration & Data Schemas';
+      }
+
       return {
         ...folder,
         fileCount,
         dirCount,
-        sizeKB: (size / 1024).toFixed(1)
+        sizeKB: (size / 1024).toFixed(1),
+        inferredDesc: inferredDesc || folder.explanation || 'General project directory'
       };
     });
   }, [rawStructure, rootFolders]);
@@ -223,12 +239,23 @@ export default function Dashboard() {
 
         {/* ── Grid Folder Explorer ── */}
         <motion.div variants={itemVariants} className="mb-16">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <Filter className="w-5 h-5 text-brand-400" />
               Root Explorer
             </h2>
             <SearchBar value={query} onChange={setQuery} count={filteredFolders.length + filteredFiles.length} />
+          </div>
+          <div className="flex items-center gap-4 mb-8 text-[10px] font-black uppercase tracking-widest text-gray-500">
+            <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg border border-white/5">
+              <Folder className="w-3 h-3" /> {rootFolders.length} Root Directories
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg border border-white/5">
+              <File className="w-3 h-3" /> {rootFiles.length} Root Files
+            </div>
+            <div className="hidden md:flex items-center gap-2 text-brand-400 opacity-60">
+              <div className="w-1 h-1 rounded-full bg-brand-500" /> Selective Architecture Mapping Active
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">

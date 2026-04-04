@@ -31,8 +31,8 @@ export default function FolderCard({ folder, index = 0 }) {
         </div>
       </div>
 
-      <p className="text-sm text-gray-400 line-clamp-2 mb-6 h-10 group-hover:text-gray-300 transition-colors relative z-10">
-        {folder.explanation || folder.description || 'General project directory'}
+      <p className="text-sm text-gray-400 line-clamp-2 mb-6 h-10 group-hover:text-gray-300 transition-colors relative z-10 transition-colors">
+        {folder.inferredDesc || folder.explanation || 'General project directory'}
       </p>
 
       <div className="flex items-center gap-6 pt-4 border-t border-white/5 relative z-10">

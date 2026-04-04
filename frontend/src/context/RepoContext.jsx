@@ -4,23 +4,12 @@ const RepoContext = createContext();
 
 export function RepoProvider({ children }) {
   // Synchronous initialization to avoid null-flicker and initial render crashes
-  const [analysis, setAnalysis] = useState(() => {
-    const savedAnalysis = sessionStorage.getItem('repo_analysis');
-    return savedAnalysis ? JSON.parse(savedAnalysis) : null;
-  });
-  
-  const [repoInfo, setRepoInfo] = useState(() => {
-    const savedRepoInfo = sessionStorage.getItem('repo_info');
-    return savedRepoInfo ? JSON.parse(savedRepoInfo) : null;
-  });
+  const [analysis, setAnalysis] = useState(null);
+  const [repoInfo, setRepoInfo] = useState(null);
 
   const setRepoData = (newAnalysis, newRepoInfo) => {
     setAnalysis(newAnalysis);
     setRepoInfo(newRepoInfo);
-    
-    // Persist to session storage so refresh works during demo
-    if (newAnalysis) sessionStorage.setItem('repo_analysis', JSON.stringify(newAnalysis));
-    if (newRepoInfo) sessionStorage.setItem('repo_info', JSON.stringify(newRepoInfo));
   };
 
   const clearRepoData = () => {

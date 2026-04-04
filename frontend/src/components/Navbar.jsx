@@ -63,17 +63,21 @@ export default function Navbar() {
                   }
                 }}
                 className={({ isActive }) =>
-                  `relative flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
+                  `relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 ${
                     isDisabled 
-                      ? 'opacity-30 cursor-not-allowed text-gray-600' 
+                      ? 'opacity-25 cursor-not-allowed text-gray-500 grayscale' 
                       : isActive 
-                        ? 'text-white bg-white/10 shadow-inner' 
-                        : 'text-gray-500 hover:text-gray-300'
+                        ? 'text-white bg-white/10 shadow-[inset_0_0_10px_rgba(255,255,255,0.05)] border border-white/10' 
+                        : 'text-gray-500 hover:text-gray-200 hover:bg-white/5'
                   }`
                 }
+                title={isDisabled ? "Select a repository to unlock this tab" : ""}
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className={`w-4 h-4 ${isDisabled ? 'text-gray-700' : ''}`} />
                 {label}
+                {isDisabled && (
+                   <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-slate-700 border border-slate-900" />
+                )}
               </NavLink>
             );
           })}
