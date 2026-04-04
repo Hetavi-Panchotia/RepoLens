@@ -15,8 +15,8 @@ Instead of spending hours reading unfamiliar code, RepoLens explains the project
 
 **Team Members:**
 
-* **Hetavi Pachotia** — Backend Developer
-* **Kreya Panchal** — Full Stack Developer
+* **Hetavi Pachotia**
+* **Kreya Panchal**
 
 ---
 
