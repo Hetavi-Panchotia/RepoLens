@@ -6,16 +6,18 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const analyzeRouter = require('./routes/analyze');
+const aiRouter = require('./routes/aiRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 
 // Routes
 app.use('/api/analyze', analyzeRouter);
+app.use('/api/ai', aiRouter);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
