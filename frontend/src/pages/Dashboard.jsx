@@ -26,11 +26,11 @@ export default function Dashboard() {
   const rawStructure = analysis.structure || { tree: [], root: { folders: analysis.folders || [], files: analysis.files || [] } };
 
   // Calculate stats
-  const totalFoldersCount = rawStructure.totalFolders !== undefined ? rawStructure.totalFolders : rawStructure.root?.folders?.length || 0;
-  const totalFilesCount = rawStructure.totalFiles !== undefined ? rawStructure.totalFiles : rawStructure.root?.files?.length || 0;
+  const totalFoldersCount = rawStructure.totalFolders !== undefined ? rawStructure.totalFolders : (rawStructure.root?.folders?.length || rawStructure.folders?.length || 0);
+  const totalFilesCount = rawStructure.totalFiles !== undefined ? rawStructure.totalFiles : (rawStructure.root?.files?.length || rawStructure.files?.length || 0);
 
   // Enhance root folders with recursive stats for Grid Layout
-  const rootFolders = rawStructure.root?.folders || [];
+  const rootFolders = rawStructure.root?.folders || rawStructure.folders || [];
   const enhancedFolders = useMemo(() => {
     return rootFolders.map(folder => {
       const prefix = folder.name + '/';
@@ -67,7 +67,7 @@ export default function Dashboard() {
     (f.explanation || '').toLowerCase().includes(query.toLowerCase())
   );
 
-  const rootFiles = rawStructure.root?.files || [];
+  const rootFiles = rawStructure.root?.files || rawStructure.files || [];
   const filteredFiles = rootFiles.filter(f => 
     f.name.toLowerCase().includes(query.toLowerCase())
   );

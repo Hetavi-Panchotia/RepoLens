@@ -44,8 +44,8 @@ export default function RecentRepos() {
         analysis: {
           summary: repo.summary,
           structure: repo.structure, // pass the structure which has root and tree
-          folders: repo.structure?.root?.folders || repo.structure?.folders || [],
-          files: repo.structure?.root?.files || repo.structure?.files || [],
+          folders: repo.structure?.root?.folders || repo.structure?.folders || repo.folders || [],
+          files: repo.structure?.root?.files || repo.structure?.files || repo.files || [],
           repoInfo: repo.repo_meta
         }
       }
@@ -90,7 +90,7 @@ export default function RecentRepos() {
           const { owner, repoName } = splitRepoUrl(repo.repo_url);
           const lang = repo.repo_meta?.language || 'Code';
           const langColor = getLanguageColor(lang);
-          const totalFolders = repo.structure?.totalFolders || repo.structure?.folders?.length || 0;
+          const totalFolders = repo.structure?.totalFolders || repo.structure?.folders?.length || repo.folders?.length || 0;
           
           return (
             <div
