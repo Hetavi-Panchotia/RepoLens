@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   GitBranch, Star, GitFork, Globe, Code2, Filter, ArrowLeft, Folder, File, Layers, Zap, Info
 } from 'lucide-react';
+import { useRepo } from '../context/RepoContext';
 import ArchitectureCard from '../components/ArchitectureCard';
 import FolderCard from '../components/FolderCard';
 import FileCard from '../components/FileCard';
@@ -20,14 +21,14 @@ function formatNum(n) {
 export default function Dashboard() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { analysis, repoInfo } = useRepo();
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
-  const analysis = location.state?.analysis || {};
-  const repoMeta = location.state?.repoInfo || analysis.repoInfo || {};
-  const rawStructure = analysis.structure || { tree: [], root: { folders: analysis.folders || [], files: analysis.files || [] } };
+  const repoMeta = repoInfo || analysis?.repoInfo || {};
+  const rawStructure = analysis?.structure || { tree: [], root: { folders: analysis?.folders || [], files: analysis?.files || [] } };
 
   // Calculate stats
   const totalFoldersCount = rawStructure.totalFolders !== undefined ? rawStructure.totalFolders : (rawStructure.root?.folders?.length || rawStructure.folders?.length || 0);
@@ -77,13 +78,13 @@ export default function Dashboard() {
   );
 
   useEffect(() => {
-    if (!location.state) {
+    if (!analysis) {
       navigate('/');
       return;
     }
     const timer = setTimeout(() => setLoading(false), 800);
     return () => clearTimeout(timer);
-  }, [location.state, navigate]);
+  }, [analysis, navigate]);
 
   const handlePreview = (path) => {
     setSelectedFile(path);

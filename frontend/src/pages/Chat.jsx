@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { Send, ArrowLeft, LayoutDashboard, AlertCircle, Sparkles, Bot, User } from 'lucide-react';
+import { useRepo } from '../context/RepoContext';
 import ChatBubble from '../components/ChatBubble';
 import TypingIndicator from '../components/TypingIndicator';
 import SuggestionChips from '../components/SuggestionChips';
@@ -10,10 +11,10 @@ import SuggestionChips from '../components/SuggestionChips';
 export default function Chat() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { analysis, repoInfo } = useRepo();
   const inputRef = useRef(null);
   const bottomRef = useRef(null);
 
-  const { repoInfo, analysis } = location.state || {};
   const repoName = repoInfo ? `${repoInfo.owner}/${repoInfo.repo}` : 'Repository';
 
   const [messages, setMessages] = useState([

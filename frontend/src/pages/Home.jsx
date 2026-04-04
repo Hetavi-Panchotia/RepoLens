@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Zap, Shield, Search, Star } from 'lucide-react';
 import axios from 'axios';
+import { useRepo } from '../context/RepoContext';
 import RepoInput from '../components/RepoInput';
 import RecentRepos from '../components/RecentRepos';
 
@@ -11,6 +12,7 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [url, setUrl] = useState('');
   const navigate = useNavigate();
+  const { setRepoData } = useRepo();
 
   const handleAnalyze = async (inputUrl) => {
     const targetUrl = inputUrl || url;
@@ -28,12 +30,8 @@ export default function Home() {
       
       const response = await axios.post(`${API_BASE_URL}/api/analyze`, { repoUrl: trimmed });
 
-      navigate('/dashboard', {
-        state: {
-          analysis: response.data,
-          repoInfo: { url: trimmed, owner: info.owner, repo: info.repo }
-        }
-      });
+      setRepoData(response.data, { url: trimmed, owner: info.owner, repo: info.repo });
+      navigate('/dashboard');
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.error || err.message || "Failed to analyze repository.");

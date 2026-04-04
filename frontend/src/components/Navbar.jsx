@@ -1,17 +1,19 @@
 import React from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Telescope, Home, LayoutDashboard, MessageSquare, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Telescope, Home, LayoutDashboard, MessageSquare, Zap, ChevronRight } from 'lucide-react';
+import { useRepo } from '../context/RepoContext';
 
 const NAV_LINKS = [
-  { to: '/', label: 'Home', icon: Home },
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/chat', label: 'Chat', icon: MessageSquare },
+  { to: '/', label: 'Home', icon: Home, requiresRepo: false },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, requiresRepo: true },
+  { to: '/chat', label: 'Chat', icon: MessageSquare, requiresRepo: true },
 ];
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { analysis, repoInfo } = useRepo();
 
   return (
     <motion.nav 
@@ -21,36 +23,55 @@ export default function Navbar() {
     >
       <div className="max-w-5xl mx-auto flex items-center justify-between px-6 py-3 bg-slate-900/60 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-2xl pointer-events-auto group/nav hover:border-brand-500/30 transition-all duration-500">
         
-        {/* Logo */}
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2.5 group/logo"
-        >
-          <div className="w-9 h-9 rounded-xl bg-premium-gradient flex items-center justify-center shadow-lg shadow-brand-500/20 group-hover/logo:scale-110 transition-transform duration-300">
-            <Telescope className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-extrabold text-white text-xl tracking-tight">
-            Repo<span className="text-brand-400 drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]">Lens</span>
-          </span>
-        </button>
+        {/* Logo and Current Repo */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2.5 group/logo"
+          >
+            <div className="w-9 h-9 rounded-xl bg-premium-gradient flex items-center justify-center shadow-lg shadow-brand-500/20 group-hover/logo:scale-110 transition-transform duration-300">
+              <Telescope className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-extrabold text-white text-xl tracking-tight hidden sm:inline">
+              Repo<span className="text-brand-400 drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]">Lens</span>
+            </span>
+          </button>
+
+          {repoInfo && (
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl animate-fade-in">
+              <ChevronRight className="w-3 h-3 text-gray-600" />
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate max-w-[120px]">
+                {repoInfo.repo}
+              </span>
+            </div>
+          )}
+        </div>
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-1 p-1 bg-white/5 rounded-xl border border-white/5">
-          {NAV_LINKS.map(({ to, label, icon: Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === '/'}
-              className={({ isActive }) =>
-                `relative flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
-                  isActive ? 'text-white bg-white/10 shadow-inner' : 'text-gray-500 hover:text-gray-300'
-                }`
-              }
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {label}
-            </NavLink>
-          ))}
+          {NAV_LINKS.map(({ to, label, icon: Icon, requiresRepo }) => {
+            const isDisabled = requiresRepo && !analysis;
+            return (
+              <NavLink
+                key={to}
+                to={isDisabled ? '#' : to}
+                end={to === '/'}
+                onClick={(e) => isDisabled && e.preventDefault()}
+                className={({ isActive }) =>
+                  `relative flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
+                    isDisabled 
+                      ? 'opacity-30 cursor-not-allowed text-gray-600' 
+                      : isActive 
+                        ? 'text-white bg-white/10 shadow-inner' 
+                        : 'text-gray-500 hover:text-gray-300'
+                  }`
+                }
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {label}
+              </NavLink>
+            );
+          })}
         </div>
 
         {/* Global Status */}
@@ -66,18 +87,30 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Nav Overlay (Optional/Simplified) */}
+      {/* Mobile Nav Overlay */}
       <div className="md:hidden mt-2 flex justify-center">
          <div className="flex items-center gap-4 bg-slate-900/80 backdrop-blur-xl px-4 py-2 rounded-2xl border border-white/10 shadow-xl pointer-events-auto">
-            {NAV_LINKS.map(({ to, icon: Icon }) => (
-              <NavLink 
-                key={to} 
-                to={to}
-                className={({ isActive }) => `p-2 rounded-lg transition-colors ${isActive ? 'text-brand-400 bg-brand-500/10' : 'text-gray-500'}`}
-              >
-                <Icon className="w-5 h-5" />
-              </NavLink>
-            ))}
+            {NAV_LINKS.map(({ to, icon: Icon, requiresRepo }) => {
+              const isDisabled = requiresRepo && !analysis;
+              return (
+                <NavLink 
+                  key={to} 
+                  to={isDisabled ? '#' : to}
+                  onClick={(e) => isDisabled && e.preventDefault()}
+                  className={({ isActive }) => 
+                    `p-2 rounded-lg transition-all ${
+                      isDisabled 
+                        ? 'opacity-20 cursor-not-allowed text-gray-700' 
+                        : isActive 
+                          ? 'text-brand-400 bg-brand-500/10' 
+                          : 'text-gray-500 hover:text-gray-300'
+                    }`
+                  }
+                >
+                  <Icon className="w-5 h-5" />
+                </NavLink>
+              );
+            })}
          </div>
       </div>
     </motion.nav>
