@@ -1,6 +1,8 @@
 import React from 'react';
 import { FileCode, FileText, FileJson, Image as ImageIcon, File } from 'lucide-react';
 
+import SpotlightCard from './SpotlightCard';
+
 export function getFileIcon(filename) {
   const ext = filename.split('.').pop().toLowerCase();
   switch (ext) {
@@ -37,11 +39,10 @@ export default function FileCard({ file, index = 0 }) {
   const sizeKB = file.size ? parseFloat(file.size) : 0;
 
   return (
-    <div
-      className="bg-slate-900 border border-white/5 rounded-2xl p-4 hover:-translate-y-1 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-brand-500/5 hover:border-brand-500/20 group relative overflow-hidden animate-slide-up flex flex-col justify-center"
-      style={{ animationDelay: `${index * 30}ms` }}
+    <SpotlightCard
+      className="p-4 hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-center animate-slide-up"
     >
-      <div className="flex items-center justify-between relative z-10 w-full">
+      <div className="flex items-center justify-between relative z-10 w-full" style={{ animationDelay: `${index * 30}ms` }}>
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-xl bg-slate-950/50 flex flex-shrink-0 items-center justify-center border border-white/5 group-hover:border-brand-500/20 transition-colors shadow-sm">
             {getFileIcon(file.name)}
@@ -67,6 +68,6 @@ export default function FileCard({ file, index = 0 }) {
            )}
         </div>
       </div>
-    </div>
+    </SpotlightCard>
   );
 }

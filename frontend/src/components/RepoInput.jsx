@@ -32,16 +32,19 @@ export default function RepoInput({ value, onChange, onKeyDown, error, loading, 
           <button
             type="submit"
             disabled={loading || !value.trim()}
-            className="flex items-center gap-2 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white px-6 py-3 rounded-xl font-semibold text-sm transition-all shadow-lg hover:shadow-brand-500/25 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
+            className="relative inline-flex h-[42px] overflow-hidden rounded-xl p-[1px] focus:outline-none hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed group/btn ml-2"
           >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <>
-                <ArrowRight className="w-4 h-4" />
-                <span className="hidden sm:inline tracking-wide">Analyze</span>
-              </>
-            )}
+            <span className="absolute inset-[-1000%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#8b5cf6_0%,#3b82f6_50%,#8b5cf6_100%)] opacity-70 group-hover/btn:opacity-100 transition-opacity duration-300" />
+            <span className="inline-flex h-full w-full items-center justify-center rounded-xl bg-slate-950 px-6 py-2 text-sm font-bold text-white backdrop-blur-xl gap-2 transition-colors hover:bg-slate-900 group-hover/btn:shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <ArrowRight className="w-4 h-4" />
+                  <span className="hidden sm:inline tracking-wide">Analyze</span>
+                </>
+              )}
+            </span>
           </button>
         </div>
       </form>

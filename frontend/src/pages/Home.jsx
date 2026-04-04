@@ -5,6 +5,7 @@ import { ArrowRight, Zap, GitBranch, FileSearch, MessageSquare, Star } from 'luc
 import Button from '../components/Button';
 import RepoInput from '../components/RepoInput';
 import RecentRepos from '../components/RecentRepos';
+import SpotlightCard from '../components/SpotlightCard';
 
 const FEATURES = [
   {
@@ -107,19 +108,24 @@ export default function Home() {
         
         {/* ── Hero Section (Narrow) ── */}
         <div className="flex flex-col items-center text-center max-w-2xl w-full mb-16">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 mb-6 hover:bg-brand-500/20 transition-colors cursor-default group">
-            <Zap className="w-3 h-3 text-brand-400 group-hover:scale-110 transition-transform" />
-            <span className="text-[10px] font-bold text-brand-300 uppercase tracking-widest">
-              Rule-Based Code Analysis
-            </span>
+          {/* Animated Watermelon Badge */}
+          <div className="relative inline-flex overflow-hidden rounded-full p-[1px] group cursor-default mb-6 hover:scale-[1.03] transition-transform duration-300 shadow-sm hover:shadow-brand-500/20">
+            <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#c084fc_0%,#3b82f6_50%,#c084fc_100%)] opacity-0 group-hover:opacity-80 transition-opacity duration-500" />
+            <div className="relative inline-flex items-center gap-2 px-4 py-1.5 bg-slate-950/80 rounded-full border border-white/10 backdrop-blur-3xl">
+              <Zap className="w-3.5 h-3.5 text-brand-400 group-hover:text-brand-300 transition-colors group-hover:drop-shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
+              <span className="text-[10px] font-bold text-gray-300 group-hover:text-white uppercase tracking-widest transition-colors">
+                Rule-Based Code Analysis
+              </span>
+            </div>
           </div>
 
           {/* Headline */}
           <h1 className="text-5xl sm:text-6xl font-extrabold leading-[1.1] tracking-tight mb-5">
             <span className="text-white">Understand any</span>
             <br />
-            <span className="text-gradient">codebase in minutes</span>
+            <span className="animate-[text-shimmer_3s_linear_infinite] bg-[linear-gradient(110deg,#8b5cf6,45%,#ec4899,55%,#8b5cf6)] bg-[length:200%_100%] bg-clip-text text-transparent drop-shadow-sm">
+              codebase in minutes
+            </span>
           </h1>
 
           <p className="text-gray-400 text-lg leading-relaxed mb-12 max-w-lg">
@@ -173,16 +179,20 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full">
             {FEATURES.map((f, i) => (
-              <div
+              <SpotlightCard
                 key={i}
-                className="glass rounded-2xl p-6 text-left hover:bg-surface-600/50 transition-all duration-300 group hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-500/10 border border-white/5 hover:border-brand-500/20"
+                className="p-6 text-left hover:-translate-y-1 group"
               >
-                <div className="w-10 h-10 rounded-xl bg-surface-900/60 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-brand-500/20 transition-all duration-300">
+                <div className="relative z-10 w-10 h-10 rounded-xl bg-slate-950/80 border border-white/5 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:border-brand-500/30 transition-all duration-300 shadow-sm">
                   {f.icon}
                 </div>
-                <h3 className="text-base font-bold text-white mb-2 group-hover:text-brand-400 transition-colors">{f.title}</h3>
-                <p className="text-xs text-gray-500 leading-relaxed">{f.desc}</p>
-              </div>
+                <h3 className="relative z-10 text-base font-bold text-white mb-2 group-hover:text-brand-300 transition-colors truncate">
+                  {f.title}
+                </h3>
+                <p className="relative z-10 text-xs text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
+                  {f.desc}
+                </p>
+              </SpotlightCard>
             ))}
           </div>
         </div>
