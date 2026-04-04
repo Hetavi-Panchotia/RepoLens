@@ -1,4 +1,3 @@
-
 # 🚀 RepoLens – AI Codebase Explainer for Developers
 
 ## 🏆 Hackathon Project Submission
@@ -153,10 +152,7 @@ Dashboard + AI Chat Interface
 # 📸 Demo Links
 
 **Live Demo:**
-
-
-**Video Demo:**
-
+https://repolens-olive.vercel.app/
 
 **GitHub Repository:**
 https://github.com/Hetavi-Panchotia/RepoLens.git
