@@ -40,6 +40,30 @@ function getFolderExplanation(name) {
   return FOLDER_MAP[lowerName] || "General project directory";
 }
 
+/**
+ * GET / - Fetch recent repositories
+ */
+router.get('/', async (req, res) => {
+  try {
+    if (!supabase) {
+      return res.status(503).json({ error: 'Supabase not initialized' });
+    }
+
+    const { data, error } = await supabase
+      .from('repositories')
+      .select('repo_url, summary, structure, repo_meta, created_at')
+      .order('created_at', { ascending: false })
+      .limit(6);
+
+    if (error) throw error;
+
+    res.status(200).json(data);
+  } catch (err) {
+    console.error('Error fetching recent repos:', err.message);
+    res.status(500).json({ error: 'Failed to fetch recent repositories' });
+  }
+});
+
 router.post('/', async (req, res, next) => {
   try {
     const { repoUrl } = req.body;

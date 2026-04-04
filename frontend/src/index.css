@@ -54,8 +54,15 @@
     @apply transition-all duration-300 ease-out;
   }
   .card-hover:hover {
-    transform: translateY(-2px) scale(1.01);
-    box-shadow: 0 8px 40px rgba(139, 92, 246, 0.2), 0 0 0 1px rgba(139, 92, 246, 0.15);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(139, 92, 246, 0.25), 0 0 0 1px rgba(139, 92, 246, 0.2);
+  }
+
+  .glow-hover {
+    @apply transition-all duration-300;
+  }
+  .glow-hover:hover {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
   }
 
   /* ── Input Glow ── */
@@ -65,7 +72,7 @@
 
   /* ── Text Gradient ── */
   .text-gradient {
-    background: linear-gradient(135deg, #e2d9f3 0%, #a78bfa 50%, #7c3aed 100%);
+    background: linear-gradient(135deg, #fff 0%, #a78bfa 50%, #8b5cf6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

@@ -12,8 +12,8 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-surface-900/70 backdrop-blur-2xl">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3.5">
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-surface-900/40 backdrop-blur-xl supports-[backdrop-filter]:bg-surface-900/40">
+      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
 
         {/* ── Logo ── */}
         <button

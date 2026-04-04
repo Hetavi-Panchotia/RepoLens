@@ -28,7 +28,7 @@ export default function FolderCard({ folder, index = 0 }) {
 
   return (
     <div
-      className={`glass rounded-2xl overflow-hidden card-hover cursor-pointer animate-slide-up`}
+      className={`glass rounded-2xl overflow-hidden card-hover glow-hover cursor-pointer animate-slide-up`}
       style={{ animationDelay: `${index * 60}ms` }}
       onClick={() => setIsOpen((v) => !v)}
     >

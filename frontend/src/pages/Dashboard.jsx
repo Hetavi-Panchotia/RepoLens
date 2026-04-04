@@ -88,28 +88,38 @@ export default function Dashboard() {
         <div className="glass rounded-2xl p-6 mb-8 animate-slide-up">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-9 h-9 rounded-lg bg-brand-500/15 flex items-center justify-center">
-                  <Code2 className="w-5 h-5 text-brand-400" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                  <Code2 className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-white leading-tight truncate px-1">
+                  <h1 className="text-2xl font-extrabold text-white leading-tight truncate px-1 tracking-tight">
                     {repoMeta.owner}/<span className="text-brand-400">{repoMeta.repo}</span>
                   </h1>
                   <a
                     href={repoMeta.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-gray-500 hover:text-brand-400 transition-colors flex items-center gap-1 mt-0.5 px-1"
+                    className="text-xs text-gray-500 hover:text-brand-400 transition-colors flex items-center gap-1.5 mt-0.5 px-1 font-medium"
                   >
-                    <Globe className="w-3 h-3" />
+                    <Globe className="w-3.5 h-3.5 text-brand-500/50" />
                     {repoMeta.url ? repoMeta.url.replace('https://', '') : 'github.com'}
                   </a>
                 </div>
               </div>
-              <p className="text-sm text-gray-400 leading-relaxed max-w-xl px-1">
-                {summary}
-              </p>
+
+              {/* Enhanced Summary Box */}
+              <div className="relative group p-4 rounded-xl bg-brand-500/5 border border-brand-500/10 mb-2 overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-brand-500/5 blur-[30px] -mr-6 -mt-6 rounded-full" />
+                <div className="flex gap-3 relative z-10">
+                  <div className="mt-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" />
+                  </div>
+                  <p className="text-sm text-gray-300 leading-relaxed max-w-2xl font-medium">
+                    {summary}
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Stats */}
