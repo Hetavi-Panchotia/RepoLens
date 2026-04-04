@@ -1,5 +1,6 @@
 import React from 'react';
-import { Github, Loader2, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { GitBranch, Loader2, ArrowRight } from 'lucide-react';
 
 export default function RepoInput({ value, onChange, onKeyDown, error, loading, onSubmit, className = '' }) {
   const handleSubmit = (e) => {
@@ -18,7 +19,7 @@ export default function RepoInput({ value, onChange, onKeyDown, error, loading, 
           
           {/* GitHub Icon Indicator */}
           <div className="pl-5 pr-3 text-gray-500 border-r border-white/5 mr-2">
-            <Github className="w-5 h-5 group-hover:text-brand-400 transition-colors" />
+            <GitBranch className="w-5 h-5 group-hover:text-brand-400 transition-colors" />
           </div>
 
           <input

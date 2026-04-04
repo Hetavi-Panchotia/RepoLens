@@ -31,7 +31,7 @@ export default function Home() {
 
       const response = await axios.post(`${API_BASE_URL}/api/analyze`, { repoUrl: trimmed });
 
-      setRepoData(response.data, { url: trimmed, owner: info.owner, repo: info.repo });
+      setRepoData(response.data, response.data.repoInfo);
       navigate('/dashboard');
     } catch (err) {
       console.error(err);
@@ -120,7 +120,7 @@ export default function Home() {
               />
               
               <div className="mt-8">
-                <SuggestionChips onSelect={handleAnalyze} disabled={loading} />
+                <SuggestionChips onSelect={setUrl} disabled={loading} />
               </div>
             </div>
           </div>

@@ -1,12 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Github, Zap, Code2, Layers } from 'lucide-react';
+import { Globe, Zap, Code2, Layers } from 'lucide-react';
 
 const SUGGESTIONS = [
   { id: 'nextjs', text: 'vercel/next.js', icon: Zap },
   { id: 'vite', text: 'vitejs/vite', icon: Code2 },
   { id: 'tailwind', text: 'tailwindlabs/tailwindcss', icon: Layers },
-  { id: 'shadcn', text: 'shadcn-ui/ui', icon: Github }
+  { id: 'shadcn', text: 'shadcn-ui/ui', icon: Globe }
 ];
 
 export default function SuggestionChips({ onSelect, disabled }) {

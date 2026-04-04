@@ -170,11 +170,17 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="relative p-5 rounded-2xl bg-slate-950/40 border border-white/5 overflow-hidden">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-500 to-brand-600" />
-                <p className="text-sm text-gray-400 leading-relaxed max-w-4xl font-medium">
-                  {analysis?.summary || "No summary available."}
-                </p>
+              <div className="mt-8">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-brand-500/10 border border-brand-500/20 mb-3">
+                  <Zap className="w-3.5 h-3.5 text-brand-400" />
+                  <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-brand-400">Analysis Summary</span>
+                </div>
+                <div className="relative p-6 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-md overflow-hidden group/summ">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-500 to-brand-600 opacity-60 group-hover/summ:opacity-100 transition-opacity" />
+                  <p className="text-base text-gray-300 leading-relaxed max-w-4xl font-medium tracking-tight">
+                    {analysis?.summary || "No summary available."}
+                  </p>
+                </div>
               </div>
             </div>
 
