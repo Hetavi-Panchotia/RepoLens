@@ -1,28 +1,33 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Lightbulb, Terminal, FileSearch, HelpCircle } from 'lucide-react';
+import { Github, Zap, Code2, Layers } from 'lucide-react';
 
 const SUGGESTIONS = [
-  { id: 'logic', text: 'Where is the main logic?', icon: Terminal },
-  { id: 'start', text: 'Where should I start?', icon: Lightbulb },
-  { id: 'structure', text: 'Explain folder structure', icon: FileSearch },
-  { id: 'tech', text: 'What tech stack is used?', icon: HelpCircle }
+  { id: 'nextjs', text: 'vercel/next.js', icon: Zap },
+  { id: 'vite', text: 'vitejs/vite', icon: Code2 },
+  { id: 'tailwind', text: 'tailwindlabs/tailwindcss', icon: Layers },
+  { id: 'shadcn', text: 'shadcn-ui/ui', icon: Github }
 ];
 
 export default function SuggestionChips({ onSelect, disabled }) {
   return (
-    <div className="flex flex-wrap gap-2 py-2">
+    <div className="flex flex-wrap items-center justify-center gap-3">
+      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mr-2">Try Analysis:</span>
       {SUGGESTIONS.map((s, i) => (
         <motion.button
           key={s.id}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.1 }}
-          whileHover={{ scale: 1.05, borderColor: 'rgba(139, 92, 246, 0.5)' }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5 + i * 0.1 }}
+          whileHover={{ 
+            scale: 1.05,
+            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+            borderColor: 'rgba(139, 92, 246, 0.4)'
+          }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => onSelect(s.text)}
+          onClick={() => onSelect(`https://github.com/${s.text}`)}
           disabled={disabled}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full glass border border-white/10 text-[11px] font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all disabled:opacity-40 disabled:cursor-not-allowed group"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/50 border border-white/5 text-[11px] font-bold text-gray-400 hover:text-brand-400 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed group shadow-sm backdrop-blur-sm"
         >
           <s.icon className="w-3 h-3 group-hover:text-brand-400 transition-colors" />
           {s.text}

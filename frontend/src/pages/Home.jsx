@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Zap, Shield, Search, Star } from 'lucide-react';
+import { Sparkles, Zap, Shield, Search, Star, Globe } from 'lucide-react';
 import axios from 'axios';
 import { useRepo } from '../context/RepoContext';
 import RepoInput from '../components/RepoInput';
 import RecentRepos from '../components/RecentRepos';
+import SuggestionChips from '../components/SuggestionChips';
 
 export default function Home() {
   const [loading, setLoading] = useState(false);
@@ -48,7 +49,7 @@ export default function Home() {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.15 }
+      transition: { staggerChildren: 0.15, delayChildren: 0.2 }
     }
   };
 
@@ -58,61 +59,57 @@ export default function Home() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden pt-24 pb-20 px-4 sm:px-6 lg:px-8 selection:bg-brand-500/30">
+    <div className="relative min-h-screen overflow-x-hidden pt-32 pb-32 px-6 selection:bg-brand-500/30">
       {/* ── Background Aesthetics ── */}
       <div className="fixed inset-0 bg-slate-950 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-grid opacity-10" />
-        <div className="absolute top-[-5%] left-[-5%] w-[40%] h-[40%] rounded-full bg-brand-600/5 blur-[80px] animate-pulse-slow" />
-        <div className="absolute bottom-[-5%] right-[-5%] w-[40%] h-[40%] rounded-full bg-pink-600/5 blur-[80px] animate-pulse-slow animation-delay-300" />
+        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-brand-600/5 blur-[120px] animate-pulse-slow" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-pink-600/5 blur-[120px] animate-pulse-slow animation-delay-300" />
       </div>
 
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="relative z-10 max-w-5xl mx-auto flex flex-col items-center text-center"
+        className="relative z-10 max-w-7xl mx-auto flex flex-col items-center"
       >
         {/* ── Badge ── */}
         <motion.div
           variants={itemVariants}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-bold mb-8 glow-box"
+          className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-[10px] font-black uppercase tracking-[0.2em] mb-12 shadow-inner"
         >
           <Sparkles className="w-3.5 h-3.5" />
-          <span>BETA v1.0 • POWERED BY GEMINI 2.0</span>
-          <div className="flex -space-x-1 ml-2">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="w-4 h-4 rounded-full border border-slate-950 bg-slate-800" />
-            ))}
-          </div>
+          <span>BETA v1.1 • POWERED BY GEMINI 2.0</span>
         </motion.div>
 
         {/* ── Hero Title ── */}
-        <motion.h1
-          variants={itemVariants}
-          className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1]"
-        >
-          Understand any repository <br />
-          <span className="text-brand-400 drop-shadow-2xl">in milliseconds.</span>
-        </motion.h1>
+        <div className="text-center mb-16 px-4">
+          <motion.h1
+            variants={itemVariants}
+            className="text-6xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.95] text-white"
+          >
+            Understand any <br className="hidden md:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-pink-500">repository</span> instantly.
+          </motion.h1>
 
-        <motion.p
-          variants={itemVariants}
-          className="max-w-2xl text-lg text-gray-400 mb-10 leading-relaxed font-medium"
-        >
-          Paste a GitHub link and let RepoLens analyze the architecture, logic,
-          and documentation for you. The future of codebase analysis is here.
-        </motion.p>
+          <motion.p
+            variants={itemVariants}
+            className="max-w-3xl mx-auto text-lg md:text-xl text-gray-500 leading-relaxed font-medium"
+          >
+            RepoLens maps complex codebases into actionable insights. 
+            Paste a GitHub link to visualize architecture, logic, and dependencies in seconds.
+          </motion.p>
+        </div>
 
-        {/* ── Main Action ── */}
+        {/* ── Main Input Card ── */}
         <motion.div
           variants={itemVariants}
-          className="w-full max-w-2xl mb-12"
+          className="w-full max-w-4xl mb-24"
         >
-          <div className="relative group p-[2px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-300">
-            {/* Dynamic Border Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-brand-600 via-pink-400 to-sky-500 animate-pulse-slow opacity-60 group-focus-within:opacity-100" />
-
-            <div className="relative bg-slate-950 rounded-2xl p-6">
+          <div className="relative group p-[1px] rounded-3xl transition-all duration-700 hover:shadow-[0_0_50px_rgba(139,92,246,0.15)]">
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-600/20 via-pink-400/20 to-sky-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-100 transition-opacity" />
+            
+            <div className="relative bg-slate-950/40 backdrop-blur-3xl rounded-3xl p-8 md:p-12 border border-white/5">
               <RepoInput
                 value={url}
                 onChange={(e) => { setUrl(e.target.value); setError(null); }}
@@ -121,53 +118,42 @@ export default function Home() {
                 loading={loading}
                 error={error}
               />
+              
+              <div className="mt-8">
+                <SuggestionChips onSelect={handleAnalyze} disabled={loading} />
+              </div>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-gray-500 font-medium">
-            <div className="flex items-center gap-1.5 hover:text-brand-400 transition-colors cursor-default">
-              <Zap className="w-4 h-4 text-brand-500" /> Fast AI Processing
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-8 text-[11px] text-gray-500 font-bold uppercase tracking-widest opacity-60">
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-brand-500" /> High-Density Analysis
             </div>
-            <div className="flex items-center gap-1.5 hover:text-brand-400 transition-colors cursor-default">
-              <Shield className="w-4 h-4 text-emerald-500" /> Enterprise-ready Parsing
+            <div className="w-1 h-1 rounded-full bg-white/10 hidden sm:block" />
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-emerald-500" /> Smart Hierarchy Mapping
             </div>
-            <div className="flex items-center gap-1.5 hover:text-brand-400 transition-colors cursor-default">
-              <Search className="w-4 h-4 text-sky-500" /> Context-grounded Search
+            <div className="w-1 h-1 rounded-full bg-white/10 hidden sm:block" />
+            <div className="flex items-center gap-2">
+              <Search className="w-4 h-4 text-sky-400" /> Context-Aware Search
             </div>
           </div>
         </motion.div>
 
-        {/* ── Social / Stats ──
-        <motion.div 
-          variants={itemVariants}
-          className="flex flex-wrap justify-center items-center gap-10 md:gap-20 py-8 border-y border-white/5 w-full mb-20"
-        >
-          <div className="flex flex-col items-center">
-            <span className="text-2xl font-bold text-white mb-1">10k+</span>
-            <span className="text-[10px] uppercase tracking-widest text-gray-600 font-bold">Repos Analyzed</span>
-          </div>
-          <div className="flex flex-col items-center">
-             <div className="flex items-center gap-1 mb-1">
-              <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-              <span className="text-2xl font-bold text-white">4.9/5</span>
-             </div>
-            <span className="text-[10px] uppercase tracking-widest text-gray-600 font-bold">Developer Rating</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-2xl font-bold text-white mb-1">3.0s</span>
-            <span className="text-[10px] uppercase tracking-widest text-gray-600 font-bold">Latency average</span>
-          </div>
-        </motion.div> */}
-
         {/* ── Recent ── */}
         <motion.div variants={itemVariants} className="w-full">
+          <div className="flex items-center gap-4 mb-10 px-2">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-white/5" />
+            <h2 className="text-xs font-black uppercase tracking-[0.3em] text-gray-600">History & Analysis</h2>
+            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-white/5" />
+          </div>
           <RecentRepos onSelect={handleAnalyze} />
         </motion.div>
       </motion.div>
 
-      {/* ── Decorations ── */}
-      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-64 h-64 bg-brand-500/5 blur-[100px] pointer-events-none" />
-      <div className="absolute top-1/4 right-0 w-96 h-96 bg-purple-500/3 blur-[120px] pointer-events-none" />
+      {/* ── Secondary Decorations ── */}
+      <div className="fixed top-1/2 left-0 -translate-y-1/2 w-[500px] h-[500px] bg-brand-500/[0.02] blur-[150px] pointer-events-none rounded-full" />
+      <div className="fixed top-1/4 right-0 w-[600px] h-[600px] bg-sky-500/[0.02] blur-[150px] pointer-events-none rounded-full" />
     </div>
   );
 }
