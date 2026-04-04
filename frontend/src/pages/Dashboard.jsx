@@ -21,7 +21,7 @@ function formatNum(n) {
 export default function Dashboard() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { analysis, repoInfo } = useRepo();
+  const { analysis, repoInfo, clearRepoData } = useRepo();
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -101,6 +101,8 @@ export default function Dashboard() {
     visible: { y: 0, opacity: 1 }
   };
 
+  if (!analysis) return null;
+
   return (
     <div className="relative min-h-screen pt-20 sm:pt-24 pb-16 px-4">
       {/* Background Aesthetics */}
@@ -116,13 +118,23 @@ export default function Dashboard() {
       >
         {/* ── Header Area ── */}
         <motion.div variants={itemVariants} className="flex items-center justify-between mb-8">
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-200 transition-colors group"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Home
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-200 transition-colors group"
+            >
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              Home
+            </button>
+            <div className="w-px h-4 bg-white/10" />
+            <button
+              onClick={() => { clearRepoData(); navigate('/'); }}
+              className="flex items-center gap-2 text-sm text-brand-400/70 hover:text-brand-400 transition-colors group px-3 py-1 rounded-lg bg-brand-500/5 hover:bg-brand-500/10 border border-brand-500/10"
+            >
+              <Zap className="w-3.5 h-3.5" />
+              New Analysis
+            </button>
+          </div>
           
           <div className="flex items-center gap-3">
              <div className="flex -space-x-1 overflow-hidden">
@@ -159,7 +171,7 @@ export default function Dashboard() {
               <div className="relative p-5 rounded-2xl bg-slate-950/40 border border-white/5 overflow-hidden">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-500 to-brand-600" />
                 <p className="text-sm text-gray-400 leading-relaxed max-w-4xl font-medium">
-                  {analysis.summary}
+                  {analysis?.summary || "No summary available."}
                 </p>
               </div>
             </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { History, ArrowRight, ArrowUpRight, Folder, Star, Code2 } from 'lucide-react';
+import { useRepo } from '../context/RepoContext';
 
 function splitRepoUrl(url) {
   try {
@@ -19,6 +20,7 @@ export default function RecentRepos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { setRepoData } = useRepo();
 
   const fetchRepos = async () => {
     setLoading(true);
@@ -39,17 +41,16 @@ export default function RecentRepos() {
   }, []);
 
   const handleCardClick = (repo) => {
-    navigate('/dashboard', {
-      state: {
-        analysis: {
-          summary: repo.summary,
-          structure: repo.structure, // pass the structure which has root and tree
-          folders: repo.structure?.root?.folders || repo.structure?.folders || repo.folders || [],
-          files: repo.structure?.root?.files || repo.structure?.files || repo.files || [],
-          repoInfo: repo.repo_meta
-        }
-      }
-    });
+    const analysisData = {
+      summary: repo.summary,
+      structure: repo.structure,
+      folders: repo.structure?.root?.folders || repo.structure?.folders || repo.folders || [],
+      files: repo.structure?.root?.files || repo.structure?.files || repo.files || [],
+      repoInfo: repo.repo_meta
+    };
+    
+    setRepoData(analysisData, repo.repo_meta);
+    navigate('/dashboard');
   };
 
   const getLanguageColor = (lang) => {

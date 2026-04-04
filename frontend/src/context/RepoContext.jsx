@@ -3,16 +3,16 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const RepoContext = createContext();
 
 export function RepoProvider({ children }) {
-  const [analysis, setAnalysis] = useState(null);
-  const [repoInfo, setRepoInfo] = useState(null);
-
-  // Load from session storage on initial load
-  useEffect(() => {
+  // Synchronous initialization to avoid null-flicker and initial render crashes
+  const [analysis, setAnalysis] = useState(() => {
     const savedAnalysis = sessionStorage.getItem('repo_analysis');
+    return savedAnalysis ? JSON.parse(savedAnalysis) : null;
+  });
+  
+  const [repoInfo, setRepoInfo] = useState(() => {
     const savedRepoInfo = sessionStorage.getItem('repo_info');
-    if (savedAnalysis) setAnalysis(JSON.parse(savedAnalysis));
-    if (savedRepoInfo) setRepoInfo(JSON.parse(savedRepoInfo));
-  }, []);
+    return savedRepoInfo ? JSON.parse(savedRepoInfo) : null;
+  });
 
   const setRepoData = (newAnalysis, newRepoInfo) => {
     setAnalysis(newAnalysis);

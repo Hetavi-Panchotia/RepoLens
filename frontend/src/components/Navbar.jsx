@@ -54,9 +54,14 @@ export default function Navbar() {
             return (
               <NavLink
                 key={to}
-                to={isDisabled ? '#' : to}
+                to={to}
                 end={to === '/'}
-                onClick={(e) => isDisabled && e.preventDefault()}
+                onClick={(e) => {
+                  if (isDisabled) {
+                    e.preventDefault();
+                    return;
+                  }
+                }}
                 className={({ isActive }) =>
                   `relative flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
                     isDisabled 
@@ -95,8 +100,13 @@ export default function Navbar() {
               return (
                 <NavLink 
                   key={to} 
-                  to={isDisabled ? '#' : to}
-                  onClick={(e) => isDisabled && e.preventDefault()}
+                  to={to}
+                  onClick={(e) => {
+                    if (isDisabled) {
+                      e.preventDefault();
+                      return;
+                    }
+                  }}
                   className={({ isActive }) => 
                     `p-2 rounded-lg transition-all ${
                       isDisabled 

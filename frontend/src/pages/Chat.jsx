@@ -119,6 +119,8 @@ export default function Chat() {
     }
   }
 
+  if (!analysis) return null;
+
   return (
     <div className="relative flex flex-col h-screen overflow-hidden bg-slate-950">
       {/* Background Aesthetics */}
