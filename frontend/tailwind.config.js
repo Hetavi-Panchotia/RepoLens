@@ -11,16 +11,18 @@ export default {
         mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
       colors: {
-        'brand': {
+        brand: {
           400: '#a78bfa',
           500: '#8b5cf6',
           600: '#7c3aed',
+          glow: 'rgba(139, 92, 246, 0.4)',
         },
-        'surface': {
+        surface: {
+          950: '#020617',
           900: '#0a0a0f',
-          800: '#111118',
-          700: '#1a1a26',
-          600: '#22223a',
+          800: '#0f172a',
+          700: '#1e293b',
+          600: '#334155',
         }
       },
       animation: {
@@ -77,6 +79,8 @@ export default {
       },
       backgroundImage: {
         'grid-pattern': 'linear-gradient(rgba(139,92,246,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.05) 1px, transparent 1px)',
+        'premium-gradient': 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+        'surface-glow': 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15), transparent 70%)',
       },
       backgroundSize: {
         'grid': '40px 40px',

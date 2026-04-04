@@ -7,6 +7,7 @@ dotenv.config();
 
 const analyzeRouter = require('./routes/analyze');
 const aiRouter = require('./routes/aiRoutes');
+const fileRouter = require('./routes/fileRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +19,7 @@ app.use(express.json({ limit: "10mb" }));
 // Routes
 app.use('/api/analyze', analyzeRouter);
 app.use('/api/ai', aiRouter);
+app.use('/api/files', fileRouter);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

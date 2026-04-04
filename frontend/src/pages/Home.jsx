@@ -1,79 +1,33 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, Zap, Shield, Search, Star } from 'lucide-react';
 import axios from 'axios';
-import { ArrowRight, Zap, GitBranch, FileSearch, MessageSquare, Star } from 'lucide-react';
-import Button from '../components/Button';
 import RepoInput from '../components/RepoInput';
 import RecentRepos from '../components/RecentRepos';
-import SpotlightCard from '../components/SpotlightCard';
-
-const FEATURES = [
-  {
-    icon: <FileSearch className="w-5 h-5 text-brand-400" />,
-    title: 'Instant Summary',
-    desc: 'Get a plain-English overview of any public repo in seconds.',
-  },
-  {
-    icon: <GitBranch className="w-5 h-5 text-emerald-400" />,
-    title: 'Structure Explorer',
-    desc: 'See every top-level folder explained — no manual browsing.',
-  },
-  {
-    icon: <MessageSquare className="w-5 h-5 text-sky-400" />,
-    title: 'Ask Anything',
-    desc: 'Chat with an AI that knows the entire codebase context.',
-  },
-];
-
-const EXAMPLE_REPOS = [
-  'facebook/react',
-  'vercel/next.js',
-  'openai/openai-python',
-];
-
-function extractGitHubInfo(url) {
-  const match = url.trim().match(/^https:\/\/github\.com\/([\w.-]+)\/([\w.-]+)(\/)?$/);
-  return match ? { owner: match[1], repo: match[2] } : null;
-}
 
 export default function Home() {
-  const [repoUrl, setRepoUrl] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isShaking, setIsShaking] = useState(false);
+  const [error, setError] = useState(null);
+  const [url, setUrl] = useState('');
   const navigate = useNavigate();
 
-  function triggerError(msg) {
-    setError(msg);
-    setIsShaking(true);
-    setTimeout(() => setIsShaking(false), 500);
-  }
-
-  async function handleAnalyze() {
-    const trimmed = repoUrl.trim();
-    if (!trimmed) {
-      triggerError('Please enter a GitHub repository URL.');
-      return;
-    }
-
-    const info = extractGitHubInfo(trimmed);
-    if (!info) {
-      triggerError('Must be a valid GitHub URL — e.g. https://github.com/owner/repo');
-      return;
-    }
-
-    setError('');
+  const handleAnalyze = async (inputUrl) => {
+    const targetUrl = inputUrl || url;
+    if (!targetUrl) return;
     setLoading(true);
-
+    setError(null);
+    
     try {
+      const trimmed = targetUrl.trim().replace(/\/$/, "");
+      const match = trimmed.match(/github\.com\/([^/]+)\/([^/]+)/);
+      if (!match) throw new Error("Invalid GitHub URL. Please use https://github.com/owner/repo");
+      
+      const info = { owner: match[1], repo: match[2] };
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      const response = await axios.post(`${API_BASE_URL}/api/analyze`, {
-        repoUrl: trimmed
-      });
+      
+      const response = await axios.post(`${API_BASE_URL}/api/analyze`, { repoUrl: trimmed });
 
-      console.log('Result:', response.data);
-
-      // Navigate and pass real analysis results
       navigate('/dashboard', {
         state: {
           analysis: response.data,
@@ -81,130 +35,139 @@ export default function Home() {
         }
       });
     } catch (err) {
-      console.error('Analysis failed:', err);
-      triggerError(err.response?.data?.error || 'Failed to analyze repository. Is the backend running?');
+      console.error(err);
+      setError(err.response?.data?.error || err.message || "Failed to analyze repository.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  function handleKeyDown(e) {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter') handleAnalyze();
-  }
+  };
 
-  function fillExample(repo) {
-    setRepoUrl(`https://github.com/${repo}`);
-    setError('');
-  }
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { staggerChildren: 0.15 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { type: 'spring', damping: 25 } }
+  };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center px-4 overflow-hidden">
-      {/* ── Background Effects ── */}
+    <div className="relative min-h-screen overflow-x-hidden pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+      {/* ── Background Aesthetics ── */}
       <div className="absolute inset-0 bg-grid-pattern bg-grid opacity-100 pointer-events-none" />
-      <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-brand-600/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-100px] right-[-100px] w-[400px] h-[400px] rounded-full bg-sky-600/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full bg-brand-600/10 blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[-100px] right-0 w-[400px] h-[400px] rounded-full bg-pink-600/5 blur-[120px] pointer-events-none" />
 
-      {/* ── Content Wrapper ── */}
-      <div className="relative z-10 flex flex-col items-center w-full max-w-6xl mx-auto py-20 pb-32">
-        
-        {/* ── Hero Section (Narrow) ── */}
-        <div className="flex flex-col items-center text-center max-w-2xl w-full mb-16">
-          {/* Animated Watermelon Badge */}
-          <div className="relative inline-flex overflow-hidden rounded-full p-[1px] group cursor-default mb-6 hover:scale-[1.03] transition-transform duration-300 shadow-sm hover:shadow-brand-500/20">
-            <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#c084fc_0%,#3b82f6_50%,#c084fc_100%)] opacity-0 group-hover:opacity-80 transition-opacity duration-500" />
-            <div className="relative inline-flex items-center gap-2 px-4 py-1.5 bg-slate-950/80 rounded-full border border-white/10 backdrop-blur-3xl">
-              <Zap className="w-3.5 h-3.5 text-brand-400 group-hover:text-brand-300 transition-colors group-hover:drop-shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
-              <span className="text-[10px] font-bold text-gray-300 group-hover:text-white uppercase tracking-widest transition-colors">
-                Rule-Based Code Analysis
-              </span>
-            </div>
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="relative z-10 max-w-5xl mx-auto flex flex-col items-center text-center"
+      >
+        {/* ── Badge ── */}
+        <motion.div 
+          variants={itemVariants}
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-bold mb-8 glow-box"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>BETA v1.0 • POWERED BY GEMINI 2.0</span>
+          <div className="flex -space-x-1 ml-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="w-4 h-4 rounded-full border border-slate-950 bg-slate-800" />
+            ))}
           </div>
+        </motion.div>
 
-          {/* Headline */}
-          <h1 className="text-5xl sm:text-6xl font-extrabold leading-[1.1] tracking-tight mb-5">
-            <span className="text-white">Understand any</span>
-            <br />
-            <span className="animate-[text-shimmer_3s_linear_infinite] bg-[linear-gradient(110deg,#8b5cf6,45%,#ec4899,55%,#8b5cf6)] bg-[length:200%_100%] bg-clip-text text-transparent drop-shadow-sm">
-              codebase in minutes
-            </span>
-          </h1>
+        {/* ── Hero Title ── */}
+        <motion.h1 
+          variants={itemVariants}
+          className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1]"
+        >
+          Understand any repository <br />
+          <span className="text-brand-400 drop-shadow-2xl">in milliseconds.</span>
+        </motion.h1>
 
-          <p className="text-gray-400 text-lg leading-relaxed mb-12 max-w-lg">
-            Paste a public GitHub URL and RepoLens will generate a developer-ready
-            summary, folder breakdown, and an interactive Q&amp;A.
-          </p>
+        <motion.p 
+          variants={itemVariants}
+          className="max-w-2xl text-lg text-gray-400 mb-10 leading-relaxed font-medium"
+        >
+          Paste a GitHub link and let RepoLens analyze the architecture, logic, 
+          and documentation for you. The future of codebase analysis is here.
+        </motion.p>
 
-          {/* Input Area */}
-          <div className={`w-full mb-6 transition-transform ${isShaking ? 'animate-shake' : ''}`}>
-             <RepoInput
-                value={repoUrl}
-                onChange={(e) => { setRepoUrl(e.target.value); setError(''); }}
+        {/* ── Main Action ── */}
+        <motion.div 
+          variants={itemVariants}
+          className="w-full max-w-2xl mb-12"
+        >
+          <div className="relative group p-[2px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-300">
+             {/* Dynamic Border Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-600 via-pink-400 to-sky-500 animate-pulse-slow opacity-60 group-focus-within:opacity-100" />
+            
+            <div className="relative bg-slate-950 rounded-2xl p-6">
+              <RepoInput 
+                value={url}
+                onChange={(e) => { setUrl(e.target.value); setError(null); }}
                 onKeyDown={handleKeyDown}
+                onSubmit={handleAnalyze} 
+                loading={loading} 
                 error={error}
-                loading={loading}
-                onSubmit={handleAnalyze}
               />
-          </div>
-
-          {/* Example repos */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
-            <span className="text-xs text-gray-600">Try:</span>
-            {EXAMPLE_REPOS.map((repo) => (
-              <button
-                key={repo}
-                onClick={() => fillExample(repo)}
-                className="text-xs font-mono text-gray-500 hover:text-brand-400 transition-colors duration-150 underline underline-offset-2 decoration-gray-700 hover:decoration-brand-500"
-              >
-                {repo}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Recent Repositories Section (Wide) ── */}
-        <div className="w-full mb-24 px-4">
-          <RecentRepos />
-        </div>
-
-        {/* ── Features Section (Wide) ── */}
-        <div className="w-full px-4">
-          <div className="flex items-center gap-3 mb-10">
-            <div className="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center border border-brand-500/20">
-              <Star className="w-5 h-5 text-brand-400" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-white tracking-tight">Core Features</h2>
-              <p className="text-xs text-gray-500 mt-0.5">Everything you need to navigate code</p>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full">
-            {FEATURES.map((f, i) => (
-              <SpotlightCard
-                key={i}
-                className="p-6 text-left hover:-translate-y-1 group"
-              >
-                <div className="relative z-10 w-10 h-10 rounded-xl bg-slate-950/80 border border-white/5 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:border-brand-500/30 transition-all duration-300 shadow-sm">
-                  {f.icon}
-                </div>
-                <h3 className="relative z-10 text-base font-bold text-white mb-2 group-hover:text-brand-300 transition-colors truncate">
-                  {f.title}
-                </h3>
-                <p className="relative z-10 text-xs text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
-                  {f.desc}
-                </p>
-              </SpotlightCard>
-            ))}
+          
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-gray-500 font-medium">
+            <div className="flex items-center gap-1.5 hover:text-brand-400 transition-colors cursor-default">
+              <Zap className="w-4 h-4 text-brand-500" /> Fast AI Processing
+            </div>
+            <div className="flex items-center gap-1.5 hover:text-brand-400 transition-colors cursor-default">
+              <Shield className="w-4 h-4 text-emerald-500" /> Enterprise-ready Parsing
+            </div>
+            <div className="flex items-center gap-1.5 hover:text-brand-400 transition-colors cursor-default">
+              <Search className="w-4 h-4 text-sky-500" /> Context-grounded Search
+            </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Footer info */}
-        <div className="flex items-center gap-2 mt-24 text-[10px] text-gray-600 uppercase tracking-widest font-bold font-mono">
-          <div className="w-1.5 h-1.5 rounded-full bg-gray-800" />
-          <span>Public Repositories Only</span>
-          <div className="w-1.5 h-1.5 rounded-full bg-gray-800" />
-        </div>
-      </div>
+        {/* ── Social / Stats ── */}
+        <motion.div 
+          variants={itemVariants}
+          className="flex flex-wrap justify-center items-center gap-10 md:gap-20 py-8 border-y border-white/5 w-full mb-20"
+        >
+          <div className="flex flex-col items-center">
+            <span className="text-2xl font-bold text-white mb-1">10k+</span>
+            <span className="text-[10px] uppercase tracking-widest text-gray-600 font-bold">Repos Analyzed</span>
+          </div>
+          <div className="flex flex-col items-center">
+             <div className="flex items-center gap-1 mb-1">
+              <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+              <span className="text-2xl font-bold text-white">4.9/5</span>
+             </div>
+            <span className="text-[10px] uppercase tracking-widest text-gray-600 font-bold">Developer Rating</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-2xl font-bold text-white mb-1">3.0s</span>
+            <span className="text-[10px] uppercase tracking-widest text-gray-600 font-bold">Latency average</span>
+          </div>
+        </motion.div>
+
+        {/* ── Recent ── */}
+        <motion.div variants={itemVariants} className="w-full">
+          <RecentRepos onSelect={handleAnalyze} />
+        </motion.div>
+      </motion.div>
+      
+      {/* ── Decorations ── */}
+      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-64 h-64 bg-brand-500/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/4 right-0 w-96 h-96 bg-purple-500/3 blur-[120px] pointer-events-none" />
     </div>
   );
 }

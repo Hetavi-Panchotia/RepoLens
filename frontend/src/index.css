@@ -42,78 +42,46 @@
 
   /* ── Glassmorphism ── */
   .glass {
-    @apply bg-surface-700/60 backdrop-blur-xl border border-white/5;
+    @apply bg-surface-800/60 backdrop-blur-xl border border-white/5 shadow-2xl;
   }
 
-  /* ── Glow Effects ── */
-  .glow-purple {
-    box-shadow: 0 0 30px rgba(139, 92, 246, 0.25), 0 0 60px rgba(139, 92, 246, 0.1);
+  .glass-light {
+    @apply bg-white/5 backdrop-blur-md border border-white/10;
   }
 
-  .glow-purple-hover:hover {
-    box-shadow: 0 0 40px rgba(139, 92, 246, 0.5), 0 0 80px rgba(139, 92, 246, 0.2);
+  /* ── Premium Glow Themes ── */
+  .glow-box {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.15), 0 0 40px rgba(139, 92, 246, 0.05);
   }
 
-  .card-hover {
-    @apply transition-all duration-300 ease-out;
+  .glow-box-hover:hover {
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.3), 0 0 60px rgba(139, 92, 246, 0.1);
   }
 
-  .card-hover:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 12px 40px rgba(139, 92, 246, 0.25), 0 0 0 1px rgba(139, 92, 246, 0.2);
+  .neon-border {
+    @apply relative border border-brand-500/30;
+    box-shadow: inset 0 0 10px rgba(139, 92, 246, 0.1), 0 0 10px rgba(139, 92, 246, 0.1);
   }
 
-  .glow-hover {
-    @apply transition-all duration-300;
+  .card-premium {
+    @apply glass transition-all duration-300 ease-out hover:-translate-y-1 hover:border-brand-500/30 hover:shadow-brand-500/10;
   }
 
-  .glow-hover:hover {
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  /* ── Input Design ── */
+  .input-premium {
+    @apply bg-surface-900/50 border border-white/10 rounded-xl px-4 py-3 text-sm transition-all duration-300 
+           focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/30 focus:shadow-lg focus:shadow-brand-500/10;
   }
 
-  /* ── Input Glow ── */
-  .input-glow:focus {
-    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5), 0 0 30px rgba(139, 92, 246, 0.15);
+  /* ── Buttons ── */
+  .btn-premium {
+    @apply relative overflow-hidden px-6 py-3 rounded-xl font-bold transition-all duration-300 
+           hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-brand-500/25;
   }
 
-  /* ── Text Gradient ── */
-  .text-gradient {
-    background: linear-gradient(135deg, #fff 0%, #a78bfa 50%, #8b5cf6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* ── Skeleton Shimmer ── */
-  .skeleton {
-    background: linear-gradient(90deg,
-        rgba(255, 255, 255, 0.04) 25%,
-        rgba(255, 255, 255, 0.08) 50%,
-        rgba(255, 255, 255, 0.04) 75%);
-    background-size: 200% 100%;
-    animation: skeleton 1.8s ease-in-out infinite;
-  }
-
-  /* ── Folder Expand/Collapse ── */
-  .folder-details {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 0.35s ease-out, opacity 0.3s ease-out;
-    opacity: 0;
-  }
-
-  .folder-details.open {
-    grid-template-rows: 1fr;
-    opacity: 1;
-  }
-
-  .folder-details-inner {
-    overflow: hidden;
-  }
-
-  /* ── Page Fade-In ── */
-  .page-enter {
-    animation: fadeIn 0.45s ease-out both;
+  /* ── Page Transitions ── */
+  .page-transition-wrap {
+    @apply transition-all duration-500 ease-in-out;
   }
 
   /* ── Animations ── */

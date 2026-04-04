@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  GitBranch, Star, GitFork, Globe, Code2, Filter, ArrowLeft, Folder, File, Layers
+  GitBranch, Star, GitFork, Globe, Code2, Filter, ArrowLeft, Folder, File, Layers, Zap, Info
 } from 'lucide-react';
-import { ArchitectureSkeleton } from '../components/SkeletonLoader';
 import ArchitectureCard from '../components/ArchitectureCard';
 import FolderCard from '../components/FolderCard';
 import FileCard from '../components/FileCard';
 import SearchBar from '../components/SearchBar';
+import RepoFlowchart from '../components/RepoFlowchart';
+import FilePreviewPanel from '../components/FilePreviewPanel';
 
 function formatNum(n) {
   if (!n) return 0;
@@ -20,6 +22,8 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const analysis = location.state?.analysis || {};
   const repoMeta = location.state?.repoInfo || analysis.repoInfo || {};
@@ -81,34 +85,62 @@ export default function Dashboard() {
     return () => clearTimeout(timer);
   }, [location.state, navigate]);
 
+  const handlePreview = (path) => {
+    setSelectedFile(path);
+    setIsPreviewOpen(true);
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1 }
+  };
+
   return (
-    <div className="relative min-h-screen pt-20 sm:pt-24 pb-16 px-4 page-enter">
-      {/* Background */}
+    <div className="relative min-h-screen pt-20 sm:pt-24 pb-16 px-4">
+      {/* Background Aesthetics */}
       <div className="absolute inset-0 bg-grid-pattern bg-grid opacity-100 pointer-events-none" />
       <div className="absolute top-[-150px] right-[-100px] w-[500px] h-[500px] rounded-full bg-brand-600/8 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 left-[-100px] w-[300px] h-[300px] rounded-full bg-sky-600/5 blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 max-w-6xl mx-auto">
-
-        {/* ── Back Button ── */}
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-200 transition-colors mb-6 group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" />
-          Back to Home
-        </button>
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="relative z-10 max-w-6xl mx-auto"
+      >
+        {/* ── Header Area ── */}
+        <motion.div variants={itemVariants} className="flex items-center justify-between mb-8">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-200 transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Home
+          </button>
+          
+          <div className="flex items-center gap-3">
+             <div className="flex -space-x-1 overflow-hidden">
+                {[1,2,3].map(i => <div key={i} className="inline-block h-6 w-6 rounded-full ring-2 ring-slate-950 bg-slate-800" />)}
+             </div>
+             <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">12 Developers Tracking</span>
+          </div>
+        </motion.div>
 
         {/* ── Repo Meta Header ── */}
-        <div className="bg-slate-900 border border-white/5 rounded-3xl p-6 md:p-8 mb-8 shadow-sm backdrop-blur animate-slide-up">
+        <motion.div variants={itemVariants} className="bg-slate-900/50 border border-white/5 rounded-3xl p-6 md:p-8 mb-8 shadow-sm backdrop-blur-xl group">
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-4 mb-5">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-600 to-brand-400 flex items-center justify-center shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-600 to-brand-400 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                   <Code2 className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-extrabold text-white leading-tight truncate tracking-tight">
+                  <h1 className="text-3xl font-extrabold text-white tracking-tight">
                     {repoMeta.owner}/<span className="text-brand-400">{repoMeta.repo}</span>
                   </h1>
                   <a
@@ -117,130 +149,114 @@ export default function Dashboard() {
                     rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-brand-400 transition-colors flex items-center gap-1.5 mt-1 font-medium"
                   >
-                    <Globe className="w-4 h-4 text-brand-500/50" />
+                    <Globe className="w-4 h-4" />
                     {repoMeta.url ? repoMeta.url.replace('https://', '') : 'github.com'}
                   </a>
                 </div>
               </div>
 
-              {/* Summary Card */}
-              <div className="relative group p-5 rounded-2xl bg-slate-950/50 border border-white/5 mb-2 overflow-hidden shadow-inner">
-                {/* Gradient left border strip */}
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-400 via-pink-400 to-sky-400"></div>
-                <div className="flex gap-3 relative z-10 pl-2">
-                  <p className="text-sm text-gray-300 leading-relaxed max-w-3xl font-medium">
-                    {analysis.summary}
-                  </p>
-                </div>
+              <div className="relative p-5 rounded-2xl bg-slate-950/40 border border-white/5 overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-500 to-brand-600" />
+                <p className="text-sm text-gray-400 leading-relaxed max-w-4xl font-medium">
+                  {analysis.summary}
+                </p>
               </div>
             </div>
 
-             <div className="flex flex-wrap gap-4 md:flex-col justify-center">
-               <div className="flex items-center gap-2 px-4 py-2 bg-slate-950 rounded-xl border border-white/5">
-                 <Star className="w-4 h-4 text-amber-400" />
-                 <span className="font-bold text-gray-200">{formatNum(repoMeta.stars)}</span>
-               </div>
-               <div className="flex items-center gap-2 px-4 py-2 bg-slate-950 rounded-xl border border-white/5">
-                 <GitFork className="w-4 h-4 text-sky-400" />
-                 <span className="font-bold text-gray-200">{formatNum(repoMeta.forks)}</span>
-               </div>
-               <div className="flex items-center gap-2 px-4 py-2 bg-slate-950 rounded-xl border border-white/5">
-                 <Code2 className="w-4 h-4 text-brand-400" />
-                 <span className="font-bold text-gray-200">{repoMeta.language || 'Code'}</span>
-               </div>
-             </div>
+            <div className="flex flex-wrap gap-3 md:flex-col justify-start">
+               {[
+                 { icon: Star, value: formatNum(repoMeta.stars), color: 'text-amber-400' },
+                 { icon: GitFork, value: formatNum(repoMeta.forks), color: 'text-sky-400' },
+                 { icon: Code2, value: repoMeta.language || 'Code', color: 'text-brand-400' }
+               ].map((stat, i) => (
+                 <div key={i} className="flex items-center gap-2 px-3 py-1.5 glass-premium rounded-xl border border-white/5 min-w-[90px]">
+                   <stat.icon className={`w-3.5 h-3.5 ${stat.color}`} />
+                   <span className="font-bold text-gray-200 text-xs">{stat.value}</span>
+                 </div>
+               ))}
+            </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* ── Architecture Overview ── */}
-        <div className="animate-slide-up animation-delay-100">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
-            <Layers className="w-5 h-5 text-brand-400" />
-            Architecture Overview
-          </h2>
-          {loading ? (
-             <ArchitectureSkeleton />
-          ) : (
-             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-               <ArchitectureCard label="Total Folders" value={totalFoldersCount} icon={Folder} colorClass="text-brand-400" />
-               <ArchitectureCard label="Total Files" value={totalFilesCount} icon={File} colorClass="text-emerald-400" />
-               <ArchitectureCard label="Primary Language" value={repoMeta.language || 'Unknown'} icon={Code2} colorClass="text-sky-400" />
-               <ArchitectureCard label="Branch" value={repoMeta.defaultBranch || 'main'} icon={GitBranch} colorClass="text-purple-400" />
-             </div>
-          )}
-        </div>
+        {/* ── Architecture Visuals ── */}
+        <motion.div variants={itemVariants} className="mb-12">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Layers className="w-5 h-5 text-brand-400" />
+              Repository Visual Architecture
+            </h2>
+            <div className="flex items-center gap-1 text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+               <Info className="w-3 h-3" /> Interactive Flow
+            </div>
+          </div>
+          <RepoFlowchart analysis={analysis} />
+        </motion.div>
+
+        {/* ── Key Metrics ── */}
+        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+            <ArchitectureCard label="Total Folders" value={totalFoldersCount} icon={Folder} colorClass="text-brand-400" />
+            <ArchitectureCard label="Total Files" value={totalFilesCount} icon={File} colorClass="text-emerald-400" />
+            <ArchitectureCard label="Entry Points" value={enhancedFolders.length} icon={Zap} colorClass="text-amber-400" />
+            <ArchitectureCard label="Tech Stack" value={repoMeta.language || 'Main'} icon={Globe} colorClass="text-sky-400" />
+        </motion.div>
 
         {/* ── Grid Folder Explorer ── */}
-        <div className="animate-slide-up animation-delay-150 relative z-20">
-           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <motion.div variants={itemVariants} className="mb-16">
+           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <Filter className="w-5 h-5 text-brand-400" />
-              Repository Structure
+              Root Explorer
             </h2>
             <SearchBar value={query} onChange={setQuery} count={filteredFolders.length + filteredFiles.length} />
           </div>
           
-           {loading ? (
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1,2,3].map(i => <div key={i} className="bg-slate-900 border border-white/5 rounded-2xl h-[180px] skeleton"></div>)}
-             </div>
-           ) : (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-30 mb-8">
-                  {filteredFolders.length > 0 ? (
-                    filteredFolders.map((folder, i) => (
-                      <FolderCard key={folder.name} folder={folder} index={i} />
-                    ))
-                  ) : filteredFiles.length === 0 ? (
-                    <div className="col-span-full">
-                      <p className="text-center text-gray-500 py-10 glass rounded-2xl border-white/5">No items found matching "{query}"</p>
-                    </div>
-                  ) : null}
-                </div>
-
-                {/* Root Files */}
-                {filteredFiles.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-300 flex items-center gap-2 mb-4 mt-2">
-                      <File className="w-5 h-5 text-gray-400" />
-                      Root Files
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-30">
-                      {filteredFiles.map((file, i) => (
-                        <FileCard key={file.name} file={file} index={i} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
-           )}
-        </div>
-
-        {/* ── AI Chat CTA Footer ── */}
-        <div className="mt-16 animate-slide-up animation-delay-300">
-          <div className="relative group overflow-hidden rounded-3xl p-[1px]">
-            <div className="absolute inset-0 bg-gradient-to-r from-brand-600 via-pink-500 to-sky-500 opacity-50 blur-sm group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="relative bg-slate-900/90 backdrop-blur-xl rounded-3xl p-8 sm:p-12 flex flex-col sm:flex-row items-center justify-between gap-6 border border-white/10">
-              <div className="flex-1 text-center sm:text-left">
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2 tracking-tight">
-                  Still have doubts?
-                </h2>
-                <p className="text-gray-400 text-sm sm:text-base max-w-2xl">
-                  Dive deeper into the codebase. Ask questions, understand dependencies, or generate snippets using our context-aware AI.
-                </p>
-              </div>
-              <button
-                onClick={() => navigate('/chat', { state: { repoInfo: repoMeta, analysis: analysis } })}
-                className="flex items-center gap-2 px-8 py-4 bg-white text-slate-950 font-bold rounded-xl hover:bg-gray-100 hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-white/25 flex-shrink-0"
-              >
-                Start Chatting
-                <ArrowLeft className="w-5 h-5 rotate-180" />
-              </button>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {filteredFolders.map((folder, i) => (
+              <FolderCard key={folder.name} folder={folder} index={i} />
+            ))}
           </div>
-        </div>
 
-      </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredFiles.map((file, i) => (
+              <div 
+                key={file.name} 
+                onClick={() => handlePreview(file.name)}
+                className="cursor-pointer"
+              >
+                <FileCard file={file} index={i} />
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* ── AI Chat CTA ── */}
+        <motion.div variants={itemVariants} className="relative group overflow-hidden rounded-[2rem] p-[1px] mb-10">
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-500 via-pink-400 to-sky-400 opacity-60 group-hover:opacity-100 transition-opacity animate-pulse-slow" />
+          <div className="relative bg-slate-950/90 backdrop-blur-2xl rounded-[2rem] p-10 flex flex-col md:flex-row items-center justify-between gap-8 border border-white/10">
+            <div className="flex-1 text-center md:text-left">
+              <h2 className="text-3xl font-extrabold text-white mb-3">Ask RepoLens anything.</h2>
+              <p className="text-gray-400 max-w-xl">
+                Get context-aware answers about architecture, logic, or specific functions. 
+                Trained on this repository's unique structure.
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/chat', { state: { repoInfo: repoMeta, analysis: analysis } })}
+              className="px-10 py-4 bg-brand-500 hover:bg-brand-400 text-white font-bold rounded-2xl transition-all shadow-lg shadow-brand-500/25 hover:scale-105 active:scale-95 whitespace-nowrap"
+            >
+              Start Intelligent Chat
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* File Preview Panel Overlay */}
+      <FilePreviewPanel 
+        isOpen={isPreviewOpen} 
+        onClose={() => setIsPreviewOpen(false)} 
+        filePath={selectedFile}
+        repoInfo={repoMeta}
+      />
     </div>
   );
 }

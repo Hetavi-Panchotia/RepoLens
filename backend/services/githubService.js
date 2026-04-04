@@ -107,6 +107,26 @@ async function buildRepoContext(owner, repo) {
   return context;
 }
 
+/**
+ * Fetch full file content from GitHub raw
+ */
+async function fetchFileContent(owner, repo, path) {
+  const headers = { 'User-Agent': 'RepoLens-AI' };
+  if (process.env.GITHUB_TOKEN) {
+    headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
+  }
+
+  try {
+    const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/${path}`;
+    const res = await axios.get(rawUrl, { headers, responseType: 'text' });
+    return res.data;
+  } catch (error) {
+    console.error(`Error fetching file ${path}:`, error.message);
+    throw new Error(`Could not fetch file content for ${path}`);
+  }
+}
+
 module.exports = {
-  buildRepoContext
+  buildRepoContext,
+  fetchFileContent
 };
