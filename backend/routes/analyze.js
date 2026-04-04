@@ -90,10 +90,23 @@ router.post('/', async (req, res, next) => {
 
       if (cachedRepo) {
         console.log('Cache hit! Returning stored data.');
+        const s = cachedRepo.structure || {};
+        
+        // Ensure backward and forward compatibility
+        const folders = s.folders || s.root?.folders || [];
+        const files = s.files || s.root?.files || [];
+        
         return res.status(200).json({
           summary: cachedRepo.summary,
-          folders: cachedRepo.structure.folders,
-          files: cachedRepo.structure.files,
+          structure: {
+            totalFolders: s.totalFolders || folders.length,
+            totalFiles: s.totalFiles || files.length,
+            tree: s.tree || [],
+            root: { folders, files }
+          },
+          // provide these for legacy frontend components
+          folders,
+          files,
           repoInfo: cachedRepo.repo_meta
         });
       }
@@ -115,9 +128,11 @@ router.post('/', async (req, res, next) => {
       headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
     }
 
-    let contents, repoMeta;
+    let repoMeta, treeData;
+    let rootContents = [];
+    
     try {
-      // 2a. Fetch Repo Metadata (stars, description, etc.)
+      // 2a. Fetch Repo Metadata
       const metaRes = await axios.get(`https://api.github.com/repos/${owner}/${repo}`, { headers });
       repoMeta = {
         owner: metaRes.data.owner.login,
@@ -128,12 +143,25 @@ router.post('/', async (req, res, next) => {
         language: metaRes.data.language,
         topics: metaRes.data.topics || [],
         url: metaRes.data.html_url,
+        defaultBranch: metaRes.data.default_branch,
         lastUpdated: new Date(metaRes.data.updated_at).toLocaleDateString()
       };
 
-      // 2b. Fetch Contents
-      const contentsRes = await axios.get(`https://api.github.com/repos/${owner}/${repo}/contents`, { headers });
-      contents = contentsRes.data;
+      // 2b. Fetch Root Contents (for the root structure fallback)
+      const rootRes = await axios.get(`https://api.github.com/repos/${owner}/${repo}/contents`, { headers });
+      rootContents = rootRes.data;
+
+      // 2c. Fetch Full Tree (Recursive)
+      const treeUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${repoMeta.defaultBranch}?recursive=1`;
+      console.log("Fetching tree:", treeUrl);
+      const treeRes = await axios.get(treeUrl, { headers });
+      treeData = treeRes.data.tree || [];
+      
+      // If truncated, limit or notify if necessary (GitHub limits to ~100k items)
+      if (treeRes.data.truncated) {
+        console.warn("GitHub tree is truncated");
+      }
+
     } catch (githubErr) {
       console.error('GitHub API error:', githubErr.message);
       if (githubErr.response?.status === 404) {
@@ -142,22 +170,40 @@ router.post('/', async (req, res, next) => {
       return res.status(githubErr.response?.status || 500).json({ error: 'Failed to fetch repository from GitHub' });
     }
 
-    // 3. Process Data (No AI)
-    const folders = contents
+    // 3. Process Data
+    const rootFolders = rootContents
       .filter(item => item.type === 'dir')
       .map(dir => ({
         name: dir.name,
         explanation: getFolderExplanation(dir.name)
       }));
 
-    const files = contents
+    const rootFiles = rootContents
       .filter(item => item.type === 'file')
       .map(file => ({
         name: file.name,
         size: (file.size / 1024).toFixed(1) + ' KB'
       }));
 
-    const summary = `This repository contains ${folders.length} folders and ${files.length} files at the top level. PRIMARY LANGUAGE: ${repoMeta.language || 'Unknown'}. DESCRIPTION: ${repoMeta.description || 'No description'}.`;
+    const totalFolders = treeData.filter(i => i.type === 'tree').length;
+    const totalFiles = treeData.filter(i => i.type === 'blob').length;
+
+    // Optional: Filter the tree down to a safe size if it's too large to send
+    const maxTreeItems = 5000;
+    const formattedTree = treeData.slice(0, maxTreeItems).map(item => ({
+      path: item.path,
+      type: item.type,
+      size: item.size
+    }));
+
+    const summary = `This repository contains ${rootFolders.length} folders and ${rootFiles.length} files at the top level. PRIMARY LANGUAGE: ${repoMeta.language || 'Unknown'}. DESCRIPTION: ${repoMeta.description || 'No description'}.`;
+
+    const fullStructure = {
+      totalFolders,
+      totalFiles,
+      tree: formattedTree,
+      root: { folders: rootFolders, files: rootFiles }
+    };
 
     // 4. Save to Database
     if (supabase) {
@@ -168,7 +214,7 @@ router.post('/', async (req, res, next) => {
           {
             repo_url: repoUrl,
             summary: summary,
-            structure: { folders, files },
+            structure: fullStructure,
             repo_meta: repoMeta
           }
         ]);
@@ -180,11 +226,12 @@ router.post('/', async (req, res, next) => {
       console.log('Supabase client not initialized. Skipping database save.');
     }
 
-    // 5. Return Response
+    // 5. Return Response (Include 'folders' and 'files' flatly for legacy UI just in case)
     return res.status(200).json({
       summary,
-      folders,
-      files,
+      structure: fullStructure,
+      folders: rootFolders,
+      files: rootFiles,
       repoInfo: repoMeta
     });
 
@@ -193,8 +240,5 @@ router.post('/', async (req, res, next) => {
     res.status(500).json({ error: 'Failed to analyze repository' });
   }
 });
-
-module.exports = router;
-
 
 module.exports = router;

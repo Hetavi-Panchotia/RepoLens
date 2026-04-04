@@ -127,25 +127,16 @@ export default function Home() {
             summary, folder breakdown, and an interactive Q&amp;A.
           </p>
 
-          {/* Input Card */}
-          <div className={`w-full glass rounded-2xl p-5 glow-purple mb-4 transition-transform ${isShaking ? 'animate-shake' : ''}`}>
-            <div className="flex flex-col sm:flex-row items-stretch gap-3">
-              <RepoInput
+          {/* Input Area */}
+          <div className={`w-full mb-6 transition-transform ${isShaking ? 'animate-shake' : ''}`}>
+             <RepoInput
                 value={repoUrl}
                 onChange={(e) => { setRepoUrl(e.target.value); setError(''); }}
                 onKeyDown={handleKeyDown}
                 error={error}
-              />
-              <Button
-                id="analyze-btn"
-                onClick={handleAnalyze}
                 loading={loading}
-                className="sm:whitespace-nowrap"
-              >
-                Analyze
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </div>
+                onSubmit={handleAnalyze}
+              />
           </div>
 
           {/* Example repos */}

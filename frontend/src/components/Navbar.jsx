@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Telescope, Home, LayoutDashboard, MessageSquare } from 'lucide-react';
 
 const NAV_LINKS = [
@@ -10,9 +10,11 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isDashboard = location.pathname === '/dashboard';
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-surface-900/40 backdrop-blur-xl supports-[backdrop-filter]:bg-surface-900/40">
+    <nav className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-white/5">
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
 
         {/* ── Logo ── */}
