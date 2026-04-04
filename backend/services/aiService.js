@@ -1,49 +1,71 @@
-const OpenAI = require("openai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const generateAIResponse = async (repoData, question) => {
-  try {
-    const safeStructure = repoData.structure ? JSON.stringify(repoData.structure).slice(0, 3000) : "[]";
-    const safeFiles = repoData.files ? JSON.stringify(repoData.files).slice(0, 3000) : "[]";
-    
-    // Add logging as requested in Step 9
-    console.log("[AI Query] Question:", question);
+const aiResponseCache = {};
 
-    const prompt = `
-You are an expert software engineer.
+/**
+ * Generate AI Response with 3 retries for 429 errors
+ */
+const generateAIResponse = async (context, question, repoKey) => {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY is not configured in the backend .env file.");
+  }
 
-Repository Summary:
-${repoData.summary || "No summary provided"}
+  // 1. Check response cache
+  const cacheKey = `${repoKey}-${question}`;
+  if (aiResponseCache[cacheKey]) {
+    console.log(`[AI Cache Hit] for: ${cacheKey}`);
+    return aiResponseCache[cacheKey];
+  }
 
-Folder Structure:
-${safeStructure}
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const prompt = `
+You are an expert software engineer analyzing a GitHub repository.
 
-Files:
-${safeFiles}
+REPOSITORY CONTEXT:
+${context}
 
-Answer clearly and concisely:
+USER QUESTION:
 ${question}
+
+INSTRUCTIONS:
+1. Answer ONLY based on the repository context above.
+2. Mention specific file names when relevant.
+3. If the information is not available in the context, say: "Not enough information from the repository."
+4. Be concise and structured.
+5. Use bullet points where appropriate.
+
+ANSWER:
 `;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Replaced hallucinations with actual lightweight model
-      messages: [
-        { role: "system", content: "You are a helpful codebase assistant. Keep your responses clear, concise, and related directly to the codebase provided." },
-        { role: "user", content: prompt }
-      ],
-      max_tokens: 500,
-    });
+  let lastError;
+  const maxRetries = 3;
 
-    return response.choices[0].message.content;
-  } catch (error) {
-    console.error("[AI ERROR]:", error.message);
-    throw new Error("AI response failed");
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      if (i > 0) console.log(`[Retry ${i}] for Gemini API...`);
+      
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+
+      // Cache successful response
+      aiResponseCache[cacheKey] = text;
+      return text;
+    } catch (error) {
+      lastError = error;
+      // Only retry on 429
+      if (error.status === 429 && i < maxRetries - 1) {
+        const delay = (i + 1) * 2000;
+        console.warn(`[GEMINI 429] Reached limit. Retrying in ${delay / 1000}s...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      throw error;
+    }
   }
+  throw lastError;
 };
 
-module.exports = {
-  generateAIResponse,
-};
+module.exports = { generateAIResponse };

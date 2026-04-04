@@ -1,28 +1,41 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Send, ArrowLeft, LayoutDashboard } from 'lucide-react';
-import { seedMessages, mockReplies } from '../data/mockData';
+import { useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { Send, ArrowLeft, LayoutDashboard, AlertCircle } from 'lucide-react';
 import ChatBubble from '../components/ChatBubble';
 import TypingIndicator from '../components/TypingIndicator';
 
-function getRandomReply() {
-  return mockReplies[Math.floor(Math.random() * mockReplies.length)];
-}
-
 export default function Chat() {
-  const [messages, setMessages] = useState(() =>
-    seedMessages.map((m) => ({ ...m, timestamp: new Date(m.timestamp) }))
-  );
+  const location = useLocation();
+  const navigate = useNavigate();
+  const inputRef = useRef(null);
+  const bottomRef = useRef(null);
+
+  const { repoInfo, analysis } = location.state || {};
+  const repoName = repoInfo ? `${repoInfo.owner}/${repoInfo.repo}` : 'Repository';
+
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      role: 'assistant',
+      text: `Hello! I'm RepoLens AI. I've analyzed \`${repoName}\` completely. What would you like to know about its code?`,
+      timestamp: new Date()
+    }
+  ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const bottomRef = useRef(null);
-  const inputRef = useRef(null);
-  const navigate = useNavigate();
+  const [errorStatus, setErrorStatus] = useState(null);
 
   // Auto-scroll on new message
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+  }, [messages, isTyping, errorStatus]);
+
+  useEffect(() => {
+    if (!analysis) {
+      navigate('/');
+    }
+  }, [analysis, navigate]);
 
   async function handleSend() {
     const text = input.trim();
@@ -32,19 +45,40 @@ export default function Chat() {
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setIsTyping(true);
+    setErrorStatus(null);
 
-    // Simulate AI thinking delay (1.0 – 2.0 seconds)
-    const delay = 1000 + Math.random() * 1000;
-    setTimeout(() => {
+    if (!repoInfo || !repoInfo.owner || !repoInfo.repo) {
+      setErrorStatus("Repository information is missing. Go back to Home.");
+      setIsTyping(false);
+      return;
+    }
+
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const response = await axios.post(`${API_BASE_URL}/api/ai/chat`, {
+        message: text,
+        owner: repoInfo.owner,
+        repo: repoInfo.repo
+      });
+
       const aiMsg = {
         id: Date.now() + 1,
         role: 'assistant',
-        text: getRandomReply(),
+        text: response.data.answer,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, aiMsg]);
+    } catch (err) {
+      console.error(err);
+      if (err.response?.status === 429) {
+        setErrorStatus("Too many requests. Please wait a few seconds 😭");
+      } else {
+        setErrorStatus("Something went wrong. Try again.");
+      }
+    } finally {
       setIsTyping(false);
-    }, delay);
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
   }
 
   function handleKeyDown(e) {
@@ -78,7 +112,7 @@ export default function Chat() {
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-xs text-gray-500">
-                {isTyping ? 'Typing…' : 'vercel/next.js · Ready'}
+                {isTyping ? 'Typing…' : `${repoName} · Ready`}
               </span>
             </div>
           </div>
@@ -101,6 +135,13 @@ export default function Chat() {
 
         {isTyping && <TypingIndicator />}
 
+        {errorStatus && (
+          <div className="flex items-center gap-2 text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl text-sm font-medium animate-slide-up w-max">
+            <AlertCircle className="w-4 h-4" />
+            {errorStatus}
+          </div>
+        )}
+
         <div ref={bottomRef} />
       </div>
 
@@ -113,17 +154,21 @@ export default function Chat() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask anything about vercel/next.js…"
+              disabled={isTyping}
+              placeholder={isTyping ? "Analyzing repository..." : `Ask anything about ${repoName}…`}
               rows={1}
               className="w-full px-4 py-3 rounded-xl text-sm
                 bg-surface-700/80 border border-white/8 text-gray-100 placeholder-gray-600
                 focus:outline-none focus:border-brand-500/60 input-glow
-                transition-all duration-200 resize-none max-h-36 overflow-y-auto"
+                transition-all duration-200 resize-none max-h-36 overflow-y-auto
+                disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ lineHeight: '1.5' }}
             />
-            <p className="absolute bottom-2 right-3 text-xs text-gray-600 pointer-events-none">
-              ⏎ Send
-            </p>
+            {!isTyping && (
+              <p className="absolute bottom-2 right-3 text-xs text-gray-600 pointer-events-none">
+                ⏎ Send
+              </p>
+            )}
           </div>
 
           <button
@@ -144,11 +189,12 @@ export default function Chat() {
 
         {/* Suggestions */}
         <div className="max-w-3xl mx-auto mt-3 flex flex-wrap gap-2">
-          {['What does /server do?', 'How are tests structured?', 'Explain the App Router'].map((q) => (
+          {['What does this project do?', 'Where is the main logic?', 'Explain folder structure', 'Where should a new developer start?'].map((q) => (
             <button
               key={q}
               onClick={() => { setInput(q); inputRef.current?.focus(); }}
-              className="text-xs px-3 py-1.5 rounded-full glass border border-white/8 text-gray-400 hover:text-brand-300 hover:border-brand-500/30 transition-all duration-150"
+              disabled={isTyping}
+              className="text-xs px-3 py-1.5 rounded-full glass border border-white/8 text-gray-400 hover:text-brand-300 hover:border-brand-500/30 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {q}
             </button>

@@ -22,7 +22,7 @@ export default function Dashboard() {
   const [query, setQuery] = useState('');
 
   const analysis = location.state?.analysis || {};
-  const repoMeta = analysis.repoInfo || {};
+  const repoMeta = location.state?.repoInfo || analysis.repoInfo || {};
   const rawStructure = analysis.structure || { tree: [], root: { folders: analysis.folders || [], files: analysis.files || [] } };
 
   // Calculate stats
@@ -230,7 +230,7 @@ export default function Dashboard() {
                 </p>
               </div>
               <button
-                onClick={() => navigate('/chat', { state: { repoInfo: repoMeta } })}
+                onClick={() => navigate('/chat', { state: { repoInfo: repoMeta, analysis: analysis } })}
                 className="flex items-center gap-2 px-8 py-4 bg-white text-slate-950 font-bold rounded-xl hover:bg-gray-100 hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-white/25 flex-shrink-0"
               >
                 Start Chatting
