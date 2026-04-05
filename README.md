@@ -14,7 +14,7 @@ Instead of spending hours reading unfamiliar code, RepoLens explains the project
 
 **Team Members:**
 
-* **Hetavi Pachotia**
+* **Hetavi Panchotia**
 * **Kreya Panchal**
 
 ---
